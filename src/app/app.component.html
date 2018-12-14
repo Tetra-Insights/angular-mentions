@@ -14,7 +14,7 @@ and content editable fields. Try entering some @names below.</p>
 <div [mention]="items" class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
 
 <h3>Content Editable with Multiple Triggers (@, #)</h3>
-<div [mention]="[{charTrigger: '@', items: items}, {charTrigger: '#', items: tagsItems}]" class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
+<div [mention]="[{charTrigger: '@', items: items}, {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true}]" class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
 
 <!--<h3>Embedded Editor</h3>-->
 <!--<app-demo-tinymce></app-demo-tinymce>-->

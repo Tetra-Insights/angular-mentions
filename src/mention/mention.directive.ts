@@ -20,8 +20,13 @@ const KEY_2 = 50;
 export interface ItemsDescription {
   charTrigger: string;
   items: any[];
+  startsWithCharTrigger: boolean;
   labelKey?: string;
+  mentionSelect?: IMentionLabelSelector;
 }
+
+export type IMentionLabelSelector = (item: any, labelKey?: string, triggerChar?: string) => string;
+
 
 /**
  * Angular 2 Mentions.
@@ -73,6 +78,7 @@ export class MentionDirective implements OnInit, OnChanges {
   startPos: number;
   items: any[];
   multipleItems: ItemsDescription[];
+  currentSelectedMultiple: ItemsDescription;
   startNode;
   searchList: MentionListComponent;
   stopSearch: boolean;
@@ -95,8 +101,8 @@ export class MentionDirective implements OnInit, OnChanges {
   private maxItems: number = -1;
 
   // optional function to format the selected item before inserting the text
-  private mentionSelect: (item: any, triggerChar?: string) => string
-    = (item: any, triggerChar?: string) => this.triggerChar + item[this.labelKey];
+  private mentionSelect: IMentionLabelSelector
+    = (item: any, labelKey: string = this.labelKey, triggerChar?: string) => this.triggerChar + item[labelKey];
 
   constructor(
     private _element: ElementRef,
@@ -111,8 +117,25 @@ export class MentionDirective implements OnInit, OnChanges {
     }
 
     if (this.multipleItems && this.multipleItems.length > 0) {
-      this.multipleItems = this.multipleItems.map(elem => ({...elem, items: this.initializeItemsList(elem.items, elem.labelKey)}));
+      this.multipleItems = this.multipleItems
+        .map(elem => ({
+          ...elem,
+          items: this.initializeItemsList(elem.items, elem.labelKey),
+          mentionSelect: elem.mentionSelect || this.defaultMentionSelectFunctionCreator(elem)
+        }));
     }
+  }
+
+  private defaultMentionSelectFunctionCreator(data: ItemsDescription): IMentionLabelSelector {
+    return (item, labelKey, charTrigger) => {
+      let ret = data.charTrigger + item[data.labelKey || this.labelKey];
+
+      if (ret.length > 1 && ret[1] === data.charTrigger) {
+        ret = ret.substr(1);
+      }
+
+      return ret;
+    };
   }
 
   private initializeItemsList(items: any[], labelKey: string = this.labelKey) {
@@ -192,7 +215,7 @@ export class MentionDirective implements OnInit, OnChanges {
       this.stopSearch = false;
       this.searchString = null;
       if (this.multiplesTriggers) {
-        this.initilizeItemsFromMultiple(charPressed);
+        this.initializeItemsFromMultiple(charPressed);
       }
       this.showSearchList(nativeElement);
       this.updateSearchList();
@@ -261,8 +284,11 @@ export class MentionDirective implements OnInit, OnChanges {
     }
   }
 
-  initilizeItemsFromMultiple(char) {
-    this.items = this.multipleItems.find(elem => elem.charTrigger === char).items;
+  initializeItemsFromMultiple(char) {
+    const triggerCharData = this.multipleItems.find(elem => elem.charTrigger === char);
+    this.currentSelectedMultiple = triggerCharData;
+    this.items = triggerCharData.items;
+    this.mentionSelect = triggerCharData.mentionSelect;
   }
 
   updateSearchList() {
@@ -271,7 +297,12 @@ export class MentionDirective implements OnInit, OnChanges {
       let objects = this.items;
       // disabling the search relies on the async operation to do the filtering
       if (!this.disableSearch && this.searchString) {
-        const searchStringLowerCase = this.searchString.toLowerCase();
+        let searchStringLowerCase = this.searchString.toLowerCase();
+
+        if (this.currentSelectedMultiple && this.currentSelectedMultiple.startsWithCharTrigger) {
+          searchStringLowerCase = this.currentSelectedMultiple.charTrigger + searchStringLowerCase;
+        }
+
         objects = this.items.filter(e => e[this.labelKey].toLowerCase().startsWith(searchStringLowerCase));
       }
       matches = objects;
