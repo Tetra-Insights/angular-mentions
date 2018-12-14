@@ -17,7 +17,11 @@ const KEY_RIGHT = 39;
 const KEY_DOWN = 40;
 const KEY_2 = 50;
 
-type mentionCharType = string | number | string[] | number[];
+export interface ItemsDescription {
+  charTrigger: string;
+  items: any[];
+  labelKey?: string;
+}
 
 /**
  * Angular 2 Mentions.
@@ -34,25 +38,29 @@ type mentionCharType = string | number | string[] | number[];
 })
 export class MentionDirective implements OnInit, OnChanges {
 
-  @Input() set mention(items: any[]) {
-    this.items = items;
+  @Input() set mention(items: any[] | ItemsDescription[]) {
+    if (items.length > 0) {
+      if (items[0].charTrigger) {
+        this.multiplesTriggers = true;
+        this.multipleItems = items;
+        this.triggerChar = this.multipleItems.map(elem => elem.charTrigger);
+      } else {
+        this.items = items;
+      }
+    } else {
+      this.items = [];
+    }
   }
 
   @Input() set mentionConfig(config: any) {
-    this.triggerChar = config.triggerChar || this.triggerChar;
+    if (!this.multipleItems) {
+      this.triggerChar = [config.triggerChar] || this.triggerChar;
+    }
     this.keyCodeSpecified = typeof this.triggerChar === 'number';
     this.labelKey = config.labelKey || this.labelKey;
     this.disableSearch = config.disableSearch || this.disableSearch;
     this.maxItems = config.maxItems || this.maxItems;
     this.mentionSelect = config.mentionSelect || this.mentionSelect;
-
-    if (isArray(this.triggerChar)) {
-      this.multiplesTriggers = true;
-
-      if (this.items) {
-        throw new Error('items parameter should not be passed for multiple char triggers are passed. Use multipleItems instead.');
-      }
-    }
   }
 
   // template to use for rendering list items
@@ -64,7 +72,7 @@ export class MentionDirective implements OnInit, OnChanges {
   searchString: string;
   startPos: number;
   items: any[];
-  multipleItems: {charTrigger: string, items: any[], labelKey: string}[];
+  multipleItems: ItemsDescription[];
   startNode;
   searchList: MentionListComponent;
   stopSearch: boolean;
@@ -74,7 +82,7 @@ export class MentionDirective implements OnInit, OnChanges {
   private multiplesTriggers = false;
 
   // the character that will trigger the menu behavior
-  private triggerChar: mentionCharType = '@';
+  private triggerChar: string[] = ['@'];
 
   // option to specify the field in the objects to be used as the item label
   private labelKey = 'label';
@@ -106,7 +114,7 @@ export class MentionDirective implements OnInit, OnChanges {
     }
   }
 
-  private initializeItemsList(items: any[], labelKey: string) {
+  private initializeItemsList(items: any[], labelKey: string = this.labelKey) {
     if (typeof items[0] === 'string') {
       // convert strings to objects
       const me = this;
@@ -177,11 +185,14 @@ export class MentionDirective implements OnInit, OnChanges {
 
     // console.log("keyHandler", this.startPos, pos, val, charPressed, event);
 
-    if (charPressed === this.triggerChar) {
+    if (this.triggerChar.includes(charPressed)) {
       this.startPos = pos;
       this.startNode = (this.iframe ? this.iframe.contentWindow.getSelection() : window.getSelection()).anchorNode;
       this.stopSearch = false;
       this.searchString = null;
+      if (this.multiplesTriggers) {
+        this.initilizeItemsFromMultiple(charPressed);
+      }
       this.showSearchList(nativeElement);
       this.updateSearchList();
     } else if (this.startPos >= 0 && !this.stopSearch) {
@@ -247,6 +258,10 @@ export class MentionDirective implements OnInit, OnChanges {
         }
       }
     }
+  }
+
+  initilizeItemsFromMultiple(char) {
+    this.items = this.multipleItems.find(elem => elem.charTrigger === char).items;
   }
 
   updateSearchList() {

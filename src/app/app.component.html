@@ -13,8 +13,11 @@ and content editable fields. Try entering some @names below.</p>
 <h3>Content Editable</h3>
 <div [mention]="items" class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
 
-<h3>Embedded Editor</h3>
-<app-demo-tinymce></app-demo-tinymce>
+<h3>Content Editable with Multiple Triggers (@, #)</h3>
+<div [mention]="[{charTrigger: '@', items: items}]" class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
+
+<!--<h3>Embedded Editor</h3>-->
+<!--<app-demo-tinymce></app-demo-tinymce>-->
 
 <!-- other demos that can be enabled -->
 <!-- <app-demo-async></app-demo-async> -->
