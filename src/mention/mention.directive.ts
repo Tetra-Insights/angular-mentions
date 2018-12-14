@@ -107,7 +107,7 @@ export class MentionDirective implements OnInit, OnChanges {
   }
 
   private initializeItemsList(items: any[], labelKey: string) {
-    if (typeof items === 'string') {
+    if (typeof items[0] === 'string') {
       // convert strings to objects
       const me = this;
       items = (<string[]>items).map(function (label) {
