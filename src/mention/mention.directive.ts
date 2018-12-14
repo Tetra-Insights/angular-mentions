@@ -3,6 +3,7 @@ import {EventEmitter, Output, OnInit, OnChanges, SimpleChanges} from '@angular/c
 
 import {MentionListComponent} from './mention-list.component';
 import {getValue, insertValue, getCaretPosition, setCaretPosition} from './mention-utils';
+import {isArray} from 'util';
 
 const KEY_BACKSPACE = 8;
 const KEY_TAB = 9;
@@ -15,6 +16,8 @@ const KEY_UP = 38;
 const KEY_RIGHT = 39;
 const KEY_DOWN = 40;
 const KEY_2 = 50;
+
+type mentionCharType = string | number | string[] | number[];
 
 /**
  * Angular 2 Mentions.
@@ -42,6 +45,14 @@ export class MentionDirective implements OnInit, OnChanges {
     this.disableSearch = config.disableSearch || this.disableSearch;
     this.maxItems = config.maxItems || this.maxItems;
     this.mentionSelect = config.mentionSelect || this.mentionSelect;
+
+    if (isArray(this.triggerChar)) {
+      this.multiplesTriggers = true;
+
+      if (this.items) {
+        throw new Error('items parameter should not be passed for multiple char triggers are passed. Use multipleItems instead.');
+      }
+    }
   }
 
   // template to use for rendering list items
@@ -53,19 +64,22 @@ export class MentionDirective implements OnInit, OnChanges {
   searchString: string;
   startPos: number;
   items: any[];
+  multipleItems: {charTrigger: string, items: any[], labelKey: string}[];
   startNode;
   searchList: MentionListComponent;
   stopSearch: boolean;
   iframe: any; // optional
   keyCodeSpecified: boolean;
 
+  private multiplesTriggers = false;
+
   // the character that will trigger the menu behavior
-  private triggerChar: string | number = '@';
+  private triggerChar: mentionCharType = '@';
 
   // option to specify the field in the objects to be used as the item label
   private labelKey = 'label';
 
-  // option to diable internal filtering. can be used to show the full list returned
+  // option to disable internal filtering. can be used to show the full list returned
   // from an async operation (or allows a custom filter function to be used - in future)
   private disableSearch = false;
 
@@ -84,22 +98,32 @@ export class MentionDirective implements OnInit, OnChanges {
 
   ngOnInit() {
     if (this.items && this.items.length > 0) {
-      if (typeof this.items[0] === 'string') {
-        // convert strings to objects
-        const me = this;
-        this.items = this.items.map(function (label) {
-          const object = {};
-          object[me.labelKey] = label;
-          return object;
-        });
-      }
-      // remove items without an labelKey (as it's required to filter the list)
-      this.items = this.items.filter(e => e[this.labelKey]);
-      this.items.sort((a, b) => a[this.labelKey].localeCompare(b[this.labelKey]));
-      if (this.searchList && !this.searchList.hidden) {
-        this.updateSearchList();
-      }
+      this.items = this.initializeItemsList(this.items, this.labelKey);
     }
+
+    if (this.multipleItems && this.multipleItems.length > 0) {
+      this.multipleItems = this.multipleItems.map(elem => ({...elem, items: this.initializeItemsList(elem.items, elem.labelKey)}));
+    }
+  }
+
+  private initializeItemsList(items: any[], labelKey: string) {
+    if (typeof items === 'string') {
+      // convert strings to objects
+      const me = this;
+      items = (<string[]>items).map(function (label) {
+        const object = {};
+        object[me.labelKey] = label;
+        return object;
+      });
+    }
+    // remove items without an labelKey (as it's required to filter the list)
+    items = items.filter(e => e[labelKey]);
+    items.sort((a, b) => a[labelKey].localeCompare(b[labelKey]));
+    if (this.searchList && !this.searchList.hidden) {
+      this.updateSearchList();
+    }
+
+    return items;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
