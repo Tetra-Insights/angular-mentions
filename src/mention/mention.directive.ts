@@ -1,9 +1,8 @@
 import {Directive, ElementRef, Input, ComponentFactoryResolver, ViewContainerRef, TemplateRef} from '@angular/core';
 import {EventEmitter, Output, OnInit, OnChanges, SimpleChanges} from '@angular/core';
 
-import {MentionListComponent} from './mention-list.component';
+import {IMentionListConfig, MentionListComponent} from './mention-list.component';
 import {getValue, insertValue, getCaretPosition, setCaretPosition} from './mention-utils';
-import {isArray} from 'util';
 
 const KEY_BACKSPACE = 8;
 const KEY_TAB = 9;
@@ -25,8 +24,16 @@ export interface ItemsDescription {
   mentionSelect?: IMentionLabelSelector;
 }
 
-export type IMentionLabelSelector = (item: any, labelKey?: string, triggerChar?: string) => string;
+export interface IMentionConfig {
+  triggerChar: string;
+  labelKey: string,
+  keyCodeSpecified: boolean;
+  disableSearch: boolean;
+  maxItems: number;
+  mentionSelect: IMentionLabelSelector,
+}
 
+export type IMentionLabelSelector = (item: any, labelKey?: string, triggerChar?: string) => string;
 
 /**
  * Angular 2 Mentions.
@@ -57,7 +64,7 @@ export class MentionDirective implements OnInit, OnChanges {
     }
   }
 
-  @Input() set mentionConfig(config: any) {
+  @Input() set mentionConfig(config: IMentionConfig) {
     if (!this.multipleItems) {
       this.triggerChar = [config.triggerChar] || this.triggerChar;
     }
@@ -69,7 +76,7 @@ export class MentionDirective implements OnInit, OnChanges {
   }
 
   // template to use for rendering list items
-  @Input() mentionListTemplate: TemplateRef<any>;
+  @Input() mentionListConfig: IMentionListConfig;
 
   // event emitted whenever the search term changes
   @Output() searchTerm = new EventEmitter();
@@ -323,7 +330,7 @@ export class MentionDirective implements OnInit, OnChanges {
       const componentRef = this._viewContainerRef.createComponent(componentFactory);
       this.searchList = componentRef.instance;
       this.searchList.position(nativeElement, this.iframe);
-      this.searchList.itemTemplate = this.mentionListTemplate;
+      this.searchList.mentionListConfig = this.mentionListConfig;
       this.searchList.labelKey = this.labelKey;
       componentRef.instance['itemClick'].subscribe(() => {
         nativeElement.focus();
