@@ -6,6 +6,11 @@ import {
 import { isInputOrTextAreaElement, getContentEditableCaretCoords } from './mention-utils';
 import { getCaretCoordinates } from './caret-coords';
 
+export interface IMentionListConfig {
+  headerTemplate?: TemplateRef<any>;
+  itemTemplate?: TemplateRef<any>;
+}
+
 /**
  * Angular 2 Mentions.
  * https://github.com/dmacfarlane/angular-mentions
@@ -34,8 +39,10 @@ import { getCaretCoordinates } from './caret-coords';
     <ng-template #defaultItemTemplate let-item="item">
       {{item[labelKey]}}
     </ng-template>
+    
     <ul #list [hidden]="hidden" class="dropdown-menu scrollable-menu">
-        <li *ngFor="let item of items; let i = index" [class.active]="activeIndex==i">
+      <ng-container *ngIf="mentionListConfig" [ngTemplateOutlet]="mentionListConfig.headerTemplate"></ng-container>
+      <li *ngFor="let item of items; let i = index" [class.active]="activeIndex==i">
             <a class="dropdown-item" (mousedown)="activeIndex=i;itemClick.emit();$event.preventDefault()">
               <ng-template [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{'item':item}"></ng-template>
             </a>
@@ -44,18 +51,23 @@ import { getCaretCoordinates } from './caret-coords';
     `
 })
 export class MentionListComponent implements OnInit {
+  @Input() mentionListConfig: IMentionListConfig = {};
   @Input() labelKey = 'label';
-  @Input() itemTemplate: TemplateRef<any>;
+
   @Output() itemClick = new EventEmitter();
+
   @ViewChild('list') list: ElementRef;
   @ViewChild('defaultItemTemplate') defaultItemTemplate: TemplateRef<any>;
+
+  itemTemplate: TemplateRef<any>;
   items = [];
   activeIndex = 0;
   hidden = false;
+
   constructor(private _element: ElementRef) {}
 
   ngOnInit() {
-    if (!this.itemTemplate) {
+    if (!this.mentionListConfig || !this.mentionListConfig.itemTemplate) {
       this.itemTemplate = this.defaultItemTemplate;
     }
   }
@@ -64,7 +76,7 @@ export class MentionListComponent implements OnInit {
   position(nativeParentElement: HTMLInputElement, iframe: HTMLIFrameElement = null) {
     let coords = { top: 0, left: 0 };
     if (isInputOrTextAreaElement(nativeParentElement)) {
-      // parent elements need to have postition:relative for this to work correctly?
+      // parent elements need to have position:relative for this to work correctly?
       coords = getCaretCoordinates(nativeParentElement, nativeParentElement.selectionStart);
       coords.top = nativeParentElement.offsetTop + coords.top + 16;
       coords.left = nativeParentElement.offsetLeft + coords.left;
