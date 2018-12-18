@@ -3,12 +3,13 @@ import {
   TemplateRef, OnInit
 } from '@angular/core';
 
-import { isInputOrTextAreaElement, getContentEditableCaretCoords } from './mention-utils';
-import { getCaretCoordinates } from './caret-coords';
+import {isInputOrTextAreaElement, getContentEditableCaretCoords} from './mention-utils';
+import {getCaretCoordinates} from './caret-coords';
 
 export interface IMentionListConfig {
   headerTemplate?: TemplateRef<any>;
   itemTemplate?: TemplateRef<any>;
+  listClasses?: string;
 }
 
 /**
@@ -20,38 +21,40 @@ export interface IMentionListConfig {
 @Component({
   selector: 'mention-list',
   styles: [`
-      .scrollable-menu {
-        display: block;
-        height: auto;
-        max-height: 300px;
-        overflow: auto;
-      }
-    `, `
-      [hidden] {
-        display: none;
-      }
-    `, `
-      li.active {
-        background-color: #f7f7f9;
-      }
-    `],
+    .scrollable-menu {
+      display: block;
+      height: auto;
+      max-height: 300px;
+      overflow: auto;
+    }
+  `, `
+    [hidden] {
+      display: none;
+    }
+  `, `
+    li.active {
+      background-color: #f7f7f9;
+    }
+  `],
   template: `
     <ng-template #defaultItemTemplate let-item="item">
       {{item[labelKey]}}
     </ng-template>
-    
-    <ul #list [hidden]="hidden" class="dropdown-menu scrollable-menu">
+
+    <ul #list [hidden]="hidden"
+        [class]="mentionListConfig.listClasses
+         ? 'dropdown-menu scrollable-menu ' + mentionListConfig.listClasses : 'dropdown-menu scrollable-menu'">
       <ng-container *ngIf="mentionListConfig" [ngTemplateOutlet]="mentionListConfig.headerTemplate"></ng-container>
       <li *ngFor="let item of items; let i = index" [class.active]="activeIndex==i">
-            <a class="dropdown-item" (mousedown)="activeIndex=i;itemClick.emit();$event.preventDefault()">
-              <ng-template [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{'item':item}"></ng-template>
-            </a>
-        </li>
+        <a class="dropdown-item" (mousedown)="activeIndex=i;itemClick.emit();$event.preventDefault()">
+          <ng-template [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{'item':item}"></ng-template>
+        </a>
+      </li>
     </ul>
-    `
+  `
 })
 export class MentionListComponent implements OnInit {
-  @Input() mentionListConfig: IMentionListConfig = {};
+  @Input() mentionListConfig: IMentionListConfig;
   @Input() labelKey = 'label';
 
   @Output() itemClick = new EventEmitter();
@@ -64,24 +67,29 @@ export class MentionListComponent implements OnInit {
   activeIndex = 0;
   hidden = false;
 
-  constructor(private _element: ElementRef) {}
+  constructor(private _element: ElementRef) {
+  }
 
   ngOnInit() {
-    if (!this.mentionListConfig || !this.mentionListConfig.itemTemplate) {
+    if (!this.mentionListConfig) {
+      this.mentionListConfig = {listClasses: ''};
+    }
+
+    if (!this.mentionListConfig.itemTemplate) {
       this.itemTemplate = this.defaultItemTemplate;
     }
   }
 
   // lots of confusion here between relative coordinates and containers
   position(nativeParentElement: HTMLInputElement, iframe: HTMLIFrameElement = null) {
-    let coords = { top: 0, left: 0 };
+    let coords = {top: 0, left: 0};
     if (isInputOrTextAreaElement(nativeParentElement)) {
       // parent elements need to have position:relative for this to work correctly?
       coords = getCaretCoordinates(nativeParentElement, nativeParentElement.selectionStart);
       coords.top = nativeParentElement.offsetTop + coords.top + 16;
       coords.left = nativeParentElement.offsetLeft + coords.left;
     } else if (iframe) {
-      const context: { iframe: HTMLIFrameElement, parent: Element } = { iframe: iframe, parent: iframe.offsetParent };
+      const context: { iframe: HTMLIFrameElement, parent: Element } = {iframe: iframe, parent: iframe.offsetParent};
       coords = getContentEditableCaretCoords(context);
     } else {
       const doc = document.documentElement;
@@ -89,7 +97,7 @@ export class MentionListComponent implements OnInit {
       const scrollTop = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
 
       // bounding rectangles are relative to view, offsets are relative to container?
-      const caretRelativeToView = getContentEditableCaretCoords({ iframe: iframe });
+      const caretRelativeToView = getContentEditableCaretCoords({iframe: iframe});
       const parentRelativeToContainer: ClientRect = nativeParentElement.getBoundingClientRect();
 
       coords.top = caretRelativeToView.top - parentRelativeToContainer.top + nativeParentElement.offsetTop - scrollTop;
