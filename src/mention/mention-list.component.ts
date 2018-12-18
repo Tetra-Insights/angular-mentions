@@ -42,8 +42,7 @@ export interface IMentionListConfig {
     </ng-template>
 
     <ul #list [hidden]="hidden"
-        [class]="mentionListConfig.listClasses
-         ? 'dropdown-menu scrollable-menu ' + mentionListConfig.listClasses : 'dropdown-menu scrollable-menu'">
+        [class]="mentionListConfig.listClasses ? mentionListConfig.listClasses : 'dropdown-menu scrollable-menu'">
       <ng-container *ngIf="mentionListConfig" [ngTemplateOutlet]="mentionListConfig.headerTemplate"></ng-container>
       <li *ngFor="let item of items; let i = index" [class.active]="activeIndex==i">
         <a class="dropdown-item" (mousedown)="activeIndex=i;itemClick.emit();$event.preventDefault()">

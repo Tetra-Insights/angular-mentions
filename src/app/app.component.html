@@ -19,11 +19,11 @@
      class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
 
 <h3>Content Editable with auto-complete list custom appearance</h3>
-<div [mention]="items" [mentionListConfig]="{headerTemplate: customHeader}" class="form-control" contenteditable="true"
+<div [mention]="items" [mentionListConfig]="{headerTemplate: customHeader, listClasses: 'custom-list'}" class="form-control" contenteditable="true"
      style="border:1px lightgrey solid;min-height:88px"></div>.
 
 <ng-template #customHeader>
-  <div class="header card-body" style="user-select: none;">
+  <div class="header" style="user-select: none;">
     <span><strong>↑</strong> <strong>↓</strong> to navigate</span>
     <span><strong>↵</strong> to select</span>
     <span><strong>esc</strong> to dismiss</span>

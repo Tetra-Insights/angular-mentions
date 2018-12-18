@@ -26,11 +26,11 @@ export interface ItemsDescription {
 
 export interface IMentionConfig {
   triggerChar: string;
-  labelKey: string,
+  labelKey: string;
   keyCodeSpecified: boolean;
   disableSearch: boolean;
   maxItems: number;
-  mentionSelect: IMentionLabelSelector,
+  mentionSelect: IMentionLabelSelector;
 }
 
 export type IMentionLabelSelector = (item: any, labelKey?: string, triggerChar?: string) => string;
