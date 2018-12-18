@@ -332,7 +332,6 @@ export class MentionDirective implements OnInit, OnChanges {
       this.searchList = componentRef.instance;
       this.searchList.position(nativeElement, this.iframe);
       this.searchList.mentionListConfig = this.mentionListConfig;
-      this.searchList.labelKey = this.labelKey;
       componentRef.instance['itemClick'].subscribe(() => {
         nativeElement.focus();
         const fakeKeydown = {'keyCode': KEY_ENTER, 'wasClick': true};
@@ -343,5 +342,7 @@ export class MentionDirective implements OnInit, OnChanges {
       this.searchList.position(nativeElement, this.iframe);
       window.setTimeout(() => this.searchList.resetScroll());
     }
+
+    this.searchList.labelKey = this.labelKey;
   }
 }
