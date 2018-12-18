@@ -9,7 +9,9 @@ import {getCaretCoordinates} from './caret-coords';
 export interface IMentionListConfig {
   headerTemplate?: TemplateRef<any>;
   itemTemplate?: TemplateRef<any>;
+  containerClasses?: string;
   listClasses?: string;
+  activeOnHover?: boolean;
 }
 
 /**
@@ -28,12 +30,38 @@ export interface IMentionListConfig {
       overflow: auto;
     }
   `, `
+    .dropdown-menu {
+      display: block;
+    }
+  `, `.dropdown-menu ul {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+  `, `
+    .dropdown-menu ul > li > a {
+      display: block;
+      padding: 3px 20px;
+      clear: both;
+      font-weight: 400;
+      line-height: 1.42857143;
+      color: #333;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+  `, `.dropdown-menu ul > li > a:hover {
+    text-decoration: none;
+    background-color: #f5f5f5;
+  }
+  `, `
     [hidden] {
       display: none;
     }
   `, `
-    li.active {
-      background-color: #f7f7f9;
+    .dropdown-menu ul>.active>a, .dropdown-menu ul>.active>a:focus, .dropdown-menu ul>.active>a:hover {
+      color: #fff;
+      text-decoration: none;
+      background-color: #337ab7;
+      outline: 0;
     }
   `],
   template: `
@@ -41,16 +69,17 @@ export interface IMentionListConfig {
       {{item[labelKey]}}
     </ng-template>
 
-    <ul #list [hidden]="hidden"
-        [class]="mentionListConfig.listClasses ? mentionListConfig.listClasses : 'dropdown-menu scrollable-menu'">
+    <div class="dropdown-menu" [hidden]="hidden">
       <ng-container *ngIf="mentionListConfig" [ngTemplateOutlet]="mentionListConfig.headerTemplate"></ng-container>
-      <li *ngFor="let item of items; let i = index" [class.active]="activeIndex==i">
-        <a class="dropdown-item" (mousedown)="activeIndex=i;itemClick.emit();$event.preventDefault()">
-          <ng-template [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{'item':item}"></ng-template>
-        </a>
-      </li>
-    </ul>
-  `
+      <ul #list [class]="mentionListConfig.listClasses ? mentionListConfig.listClasses : 'scrollable-menu'">
+        <li *ngFor="let item of items; let i = index" [class.active]="activeIndex==i">
+          <a class="dropdown-item" (mousedown)="activeIndex=i;itemClick.emit();$event.preventDefault()" 
+             (mouseenter)="mentionListConfig.activeOnHover && activateItem(i)" >
+            <ng-template [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{'item':item}"></ng-template>
+          </a>
+        </li>
+      </ul>
+    </div>`
 })
 export class MentionListComponent implements OnInit {
   @Input() mentionListConfig: IMentionListConfig;
@@ -110,6 +139,10 @@ export class MentionListComponent implements OnInit {
 
   get activeItem() {
     return this.items[this.activeIndex];
+  }
+
+  activateItem(index) {
+    this.activeIndex = index;
   }
 
   activateNextItem() {

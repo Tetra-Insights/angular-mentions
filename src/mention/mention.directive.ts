@@ -128,6 +128,7 @@ export class MentionDirective implements OnInit, OnChanges {
         .map(elem => ({
           ...elem,
           items: this.initializeItemsList(elem.items, elem.labelKey),
+          labelKey: elem.labelKey || this.labelKey,
           mentionSelect: elem.mentionSelect || this.defaultMentionSelectFunctionCreator(elem)
         }));
     }
