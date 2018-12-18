@@ -295,6 +295,7 @@ export class MentionDirective implements OnInit, OnChanges {
     const triggerCharData = this.multipleItems.find(elem => elem.charTrigger === char);
     this.currentSelectedMultiple = triggerCharData;
     this.items = triggerCharData.items;
+    this.labelKey = triggerCharData.labelKey;
     this.mentionSelect = triggerCharData.mentionSelect;
   }
 
