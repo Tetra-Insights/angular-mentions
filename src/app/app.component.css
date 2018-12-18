@@ -1,0 +1,15 @@
+::ng-deep .custom-list {
+  min-width: 320px;
+}
+
+::ng-deep .custom-list .header {
+  text-align: center;
+}
+
+::ng-deep .custom-list li.active{
+  background-color: transparent;
+}
+
+::ng-deep .custom-list li:hover{
+  background-color: #f7f7f9;
+}
