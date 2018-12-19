@@ -8,7 +8,6 @@ import {getCaretCoordinates} from './caret-coords';
 
 export interface IMentionListConfig {
   headerTemplate?: TemplateRef<any>;
-  itemTemplate?: TemplateRef<any>;
   containerClasses?: string;
   listClasses?: string;
   activeOnHover?: boolean;
@@ -103,7 +102,7 @@ export class MentionListComponent implements OnInit {
       this.mentionListConfig = {listClasses: ''};
     }
 
-    if (!this.mentionListConfig.itemTemplate) {
+    if (!this.itemTemplate) {
       this.itemTemplate = this.defaultItemTemplate;
     }
   }

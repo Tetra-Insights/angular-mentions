@@ -22,6 +22,7 @@ export interface ItemsDescription {
   startsWithCharTrigger: boolean;
   labelKey?: string;
   mentionSelect?: IMentionLabelSelector;
+  itemTemplate?: TemplateRef<any>;
 }
 
 export interface IMentionConfig {
@@ -84,6 +85,7 @@ export class MentionDirective implements OnInit, OnChanges {
   searchString: string;
   startPos: number;
   items: any[];
+  itemTemplate: TemplateRef<any>;
   multipleItems: ItemsDescription[];
   currentSelectedMultiple: ItemsDescription;
   startNode;
@@ -296,6 +298,7 @@ export class MentionDirective implements OnInit, OnChanges {
     const triggerCharData = this.multipleItems.find(elem => elem.charTrigger === char);
     this.currentSelectedMultiple = triggerCharData;
     this.items = triggerCharData.items;
+    this.itemTemplate = triggerCharData.itemTemplate;
     this.labelKey = triggerCharData.labelKey;
     this.mentionSelect = triggerCharData.mentionSelect;
   }
@@ -332,6 +335,7 @@ export class MentionDirective implements OnInit, OnChanges {
       const componentRef = this._viewContainerRef.createComponent(componentFactory);
       this.searchList = componentRef.instance;
       this.searchList.position(nativeElement, this.iframe);
+      this.searchList.itemTemplate = this.itemTemplate;
       this.searchList.mentionListConfig = this.mentionListConfig;
       componentRef.instance['itemClick'].subscribe(() => {
         nativeElement.focus();
