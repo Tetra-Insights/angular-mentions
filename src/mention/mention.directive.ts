@@ -335,7 +335,6 @@ export class MentionDirective implements OnInit, OnChanges {
       const componentRef = this._viewContainerRef.createComponent(componentFactory);
       this.searchList = componentRef.instance;
       this.searchList.position(nativeElement, this.iframe);
-      this.searchList.itemTemplate = this.itemTemplate;
       this.searchList.mentionListConfig = this.mentionListConfig;
       componentRef.instance['itemClick'].subscribe(() => {
         nativeElement.focus();
@@ -347,7 +346,7 @@ export class MentionDirective implements OnInit, OnChanges {
       this.searchList.position(nativeElement, this.iframe);
       window.setTimeout(() => this.searchList.resetScroll());
     }
-
+    this.searchList.itemTemplate = this.itemTemplate;
     this.searchList.labelKey = this.labelKey;
   }
 }
