@@ -19,7 +19,9 @@
      class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
 
 <h3>Content Editable with customized appearance list </h3>
-<div [mention]="items" [mentionListConfig]="{headerTemplate: customHeader, listClasses: 'scrollable-menu pretty-scrollbar custom-list'}" class="form-control" contenteditable="true"
+<div [mention]="items"
+     [mentionListConfig]="{headerTemplate: customHeader, listClasses: 'scrollable-menu pretty-scrollbar custom-list'}"
+     class="form-control" contenteditable="true"
      style="border:1px lightgrey solid;min-height:88px"></div>
 
 <h3>Active on Hover</h3>
@@ -27,7 +29,8 @@
      style="border:1px lightgrey solid;min-height:88px"></div>
 
 <h3>Content Editable with Multiple Triggers and Item Templates (@, #)</h3>
-<div [mention]="[{charTrigger: '@', items: items, itemTemplate: userTemplate}, {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, itemTemplate: tagsTemplate}]"
+<div [mention]="[{charTrigger: '@', items: items, itemTemplate: userTemplate},
+      {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true}]"
      class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
 
 <ng-template #customHeader>

@@ -1,6 +1,6 @@
 import {
   Component, ElementRef, Output, EventEmitter, ViewChild, Input,
-  TemplateRef, OnInit
+  TemplateRef, OnInit, OnChanges, SimpleChanges
 } from '@angular/core';
 
 import {isInputOrTextAreaElement, getContentEditableCaretCoords} from './mention-utils';
@@ -74,13 +74,13 @@ export interface IMentionListConfig {
         <li *ngFor="let item of items; let i = index" [class.active]="activeIndex==i">
           <a class="dropdown-item" (mousedown)="activeIndex=i;itemClick.emit();$event.preventDefault()" 
              (mouseenter)="mentionListConfig.activeOnHover && activateItem(i)" >
-            <ng-template [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{'item':item}"></ng-template>
+            <ng-template [ngTemplateOutlet]="_itemTemplate" [ngTemplateOutletContext]="{'item':item}"></ng-template>
           </a>
         </li>
       </ul>
     </div>`
 })
-export class MentionListComponent implements OnInit {
+export class MentionListComponent implements OnInit  {
   @Input() mentionListConfig: IMentionListConfig;
   @Input() labelKey = 'label';
 
@@ -89,7 +89,15 @@ export class MentionListComponent implements OnInit {
   @ViewChild('list') list: ElementRef;
   @ViewChild('defaultItemTemplate') defaultItemTemplate: TemplateRef<any>;
 
-  itemTemplate: TemplateRef<any>;
+  @Input() set itemTemplate(template: TemplateRef<any>) {
+    if (!template) {
+      this._itemTemplate = this.defaultItemTemplate;
+    } else {
+      this._itemTemplate = template;
+    }
+  };
+
+  _itemTemplate: TemplateRef<any>;
   items = [];
   activeIndex = 0;
   hidden = false;
@@ -102,8 +110,8 @@ export class MentionListComponent implements OnInit {
       this.mentionListConfig = {listClasses: ''};
     }
 
-    if (!this.itemTemplate) {
-      this.itemTemplate = this.defaultItemTemplate;
+    if (!this._itemTemplate) {
+      this._itemTemplate = this.defaultItemTemplate;
     }
   }
 
