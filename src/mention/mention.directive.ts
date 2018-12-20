@@ -23,6 +23,7 @@ export interface ItemsDescription {
   labelKey?: string;
   mentionSelect?: IMentionLabelSelector;
   itemTemplate?: TemplateRef<any>;
+  spaceSeparated?: boolean;
 }
 
 export interface IMentionConfig {
@@ -227,8 +228,11 @@ export class MentionDirective implements OnInit, OnChanges {
       if (this.multiplesTriggers) {
         this.initializeItemsFromMultiple(charPressed);
       }
-      this.showSearchList(nativeElement);
-      this.updateSearchList();
+
+      if (!this.currentSelectedMultiple.spaceSeparated || val.length === 0 || [31, 160].includes(val.charCodeAt(val.length - 1))) {
+        this.showSearchList(nativeElement);
+        this.updateSearchList();
+      }
     } else if (this.startPos >= 0 && !this.stopSearch) {
       if (pos <= this.startPos) {
         this.searchList.hidden = true;
