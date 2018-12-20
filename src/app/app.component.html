@@ -33,9 +33,8 @@
       {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true}]"
      class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
 
-<h3>Content Editable with Multiple Triggers and Item Templates (@, #)</h3>
-<div [mention]="[{charTrigger: '@', items: items, itemTemplate: userTemplate},
-      {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
+<h3>Trigger # char with required space before it in order to allow multiple words tagging like #awesome summer#</h3>
+<div [mention]="[{charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
      class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
 
 <ng-template #customHeader>
