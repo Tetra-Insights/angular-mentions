@@ -33,6 +33,11 @@
       {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true}]"
      class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
 
+<h3>Content Editable with Multiple Triggers and Item Templates (@, #)</h3>
+<div [mention]="[{charTrigger: '@', items: items, itemTemplate: userTemplate},
+      {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
+     class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
+
 <ng-template #customHeader>
   <div class="header" style="user-select: none;">
     <span><strong>↑</strong> <strong>↓</strong> to navigate</span>
