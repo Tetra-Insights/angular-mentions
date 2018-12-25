@@ -120,11 +120,6 @@ export class MentionListComponent implements OnInit  {
   // lots of confusion here between relative coordinates and containers
   position(nativeParentElement: HTMLInputElement, iframe: HTMLIFrameElement = null) {
     let coords = {top: 0, left: 0};
-    const doc = document.documentElement;
-    const caretRelativeToView = getContentEditableCaretCoords({iframe: iframe});
-    const parentRelativeToContainer: ClientRect = nativeParentElement.getBoundingClientRect();
-    const scrollLeft = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
-    const scrollTop = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
 
     if (isInputOrTextAreaElement(nativeParentElement)) {
       // parent elements need to have position:relative for this to work correctly?
@@ -135,9 +130,12 @@ export class MentionListComponent implements OnInit  {
       const context: { iframe: HTMLIFrameElement, parent: Element } = {iframe: iframe, parent: iframe.offsetParent};
       coords = getContentEditableCaretCoords(context);
     } else {
-
-
       // bounding rectangles are relative to view, offsets are relative to container?
+      const doc = document.documentElement;
+      const caretRelativeToView = getContentEditableCaretCoords({iframe: iframe});
+      const parentRelativeToContainer: ClientRect = nativeParentElement.getBoundingClientRect();
+      const scrollLeft = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+      const scrollTop = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
 
       coords.top = caretRelativeToView.top - parentRelativeToContainer.top + nativeParentElement.offsetTop - scrollTop;
       coords.left = caretRelativeToView.left - parentRelativeToContainer.left + nativeParentElement.offsetLeft - scrollLeft;
@@ -153,6 +151,11 @@ export class MentionListComponent implements OnInit  {
     setTimeout( () => {
       const viewportOffset = this.dropdown.nativeElement.getBoundingClientRect();
 
+      const doc = document.documentElement;
+      const fontHeight = isInputOrTextAreaElement(nativeParentElement)
+        ? getCaretCoordinates(nativeParentElement, nativeParentElement.selectionStart).top + 16
+        : getContentEditableCaretCoords({iframe: iframe}).height + 9;
+
       if (viewportOffset.bottom > doc.clientHeight) {
         let downHeight = viewportOffset.height - (viewportOffset.bottom - doc.clientHeight);
         let upHeight = viewportOffset.top;
@@ -164,11 +167,14 @@ export class MentionListComponent implements OnInit  {
           this.list.nativeElement.style.height = viewportOffset.height + 'px';
         } else {
           this.list.nativeElement.style.height = viewportOffset.height + 'px';
-          el.style.top = (coords.top - viewportOffset.height - 2 * caretRelativeToView.height) + 'px';
+          el.style.top = (coords.top - viewportOffset.height - fontHeight) + 'px';
         }
       }
 
       this.dropdown.nativeElement.style.opacity = 1;
+      if (isInputOrTextAreaElement(nativeParentElement)) {
+        nativeParentElement.focus();
+      }
     }, 0);
   }
 
