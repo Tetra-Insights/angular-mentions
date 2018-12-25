@@ -1,6 +1,6 @@
 import {
   Component, ElementRef, Output, EventEmitter, ViewChild, Input,
-  TemplateRef, OnInit, OnChanges, SimpleChanges
+  TemplateRef, OnInit
 } from '@angular/core';
 
 import {isInputOrTextAreaElement, getContentEditableCaretCoords} from './mention-utils';
@@ -157,8 +157,8 @@ export class MentionListComponent implements OnInit  {
         let downHeight = viewportOffset.height - (viewportOffset.bottom - doc.clientHeight);
         let upHeight = viewportOffset.top;
 
-        downHeight = (downHeight > 300 ? 300 : downHeight)
-        upHeight = (upHeight > 300 ? 300 : upHeight)
+        downHeight = (downHeight > 300 ? 300 : downHeight);
+        upHeight = (upHeight > 300 ? 300 : upHeight);
 
         if (downHeight >= upHeight) {
           this.list.nativeElement.style.height = viewportOffset.height + 'px';
