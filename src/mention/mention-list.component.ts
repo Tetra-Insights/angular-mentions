@@ -149,26 +149,32 @@ export class MentionListComponent implements OnInit  {
     this.dropdown.nativeElement.style.opacity = 0;
 
     setTimeout( () => {
-      const viewportOffset = this.dropdown.nativeElement.getBoundingClientRect();
+      const listViewportOffset: ClientRect = this.list.nativeElement.getBoundingClientRect();
+      const dropdownViewportOffset: ClientRect = this.dropdown.nativeElement.getBoundingClientRect();
 
       const doc = document.documentElement;
       const fontHeight = isInputOrTextAreaElement(nativeParentElement)
         ? getCaretCoordinates(nativeParentElement, nativeParentElement.selectionStart).top + 16
         : getContentEditableCaretCoords({iframe: iframe}).height + 9;
 
-      if (viewportOffset.bottom > doc.clientHeight) {
-        let downHeight = viewportOffset.height - (viewportOffset.bottom - doc.clientHeight);
-        let upHeight = viewportOffset.top;
+      if (listViewportOffset.bottom > doc.clientHeight) {
+        let downHeight = dropdownViewportOffset.height - (listViewportOffset.bottom - doc.clientHeight);
+        let upHeight = dropdownViewportOffset.top - fontHeight;
 
         downHeight = (downHeight > 300 ? 300 : downHeight);
         upHeight = (upHeight > 300 ? 300 : upHeight);
 
         if (downHeight >= upHeight) {
-          this.list.nativeElement.style.height = viewportOffset.height + 'px';
+          this.list.nativeElement.style.height = (listViewportOffset.height > downHeight ? downHeight : listViewportOffset.height) + 'px';
         } else {
-          this.list.nativeElement.style.height = viewportOffset.height + 'px';
-          el.style.top = (coords.top - viewportOffset.height - fontHeight) + 'px';
+          const height = listViewportOffset.height > upHeight ? upHeight : listViewportOffset.height;
+          this.list.nativeElement.style.height = height + 'px';
+          el.style.top = (coords.top - height - fontHeight) + 'px';
         }
+      }
+
+      if (listViewportOffset.right > doc.clientWidth) {
+        el.style.left = (coords.left - listViewportOffset.width) + 'px';
       }
 
       this.dropdown.nativeElement.style.opacity = 1;
