@@ -11,6 +11,7 @@ export interface IMentionListConfig {
   containerClasses?: string;
   listClasses?: string;
   activeOnHover?: boolean;
+  position?: 'relative' | 'fixed';
 }
 
 /**
@@ -109,7 +110,9 @@ export class MentionListComponent implements OnInit  {
 
   ngOnInit() {
     if (!this.mentionListConfig) {
-      this.mentionListConfig = {listClasses: ''};
+      this.mentionListConfig = {listClasses: '', position: 'relative'};
+    } else if (!this.mentionListConfig.position) {
+      this.mentionListConfig.position = 'relative';
     }
 
     if (!this._itemTemplate) {
@@ -119,36 +122,25 @@ export class MentionListComponent implements OnInit  {
 
   // lots of confusion here between relative coordinates and containers
   position(nativeParentElement: HTMLInputElement, iframe: HTMLIFrameElement = null) {
-    let coords = {top: 0, left: 0};
+    let positioning;
 
-    if (isInputOrTextAreaElement(nativeParentElement)) {
-      // parent elements need to have position:relative for this to work correctly?
-      coords = getCaretCoordinates(nativeParentElement, nativeParentElement.selectionStart);
-      coords.top = nativeParentElement.offsetTop + coords.top + 16;
-      coords.left = nativeParentElement.offsetLeft + coords.left;
-    } else if (iframe) {
-      const context: { iframe: HTMLIFrameElement, parent: Element } = {iframe: iframe, parent: iframe.offsetParent};
-      coords = getContentEditableCaretCoords(context);
-    } else {
-      // bounding rectangles are relative to view, offsets are relative to container?
-      const doc = document.documentElement;
-      const caretRelativeToView = getContentEditableCaretCoords({iframe: iframe});
-      const parentRelativeToContainer: ClientRect = nativeParentElement.getBoundingClientRect();
-      const scrollLeft = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
-      const scrollTop = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
+    if (this.mentionListConfig.position === 'relative') {
+      positioning = this.setRelativePositioning(nativeParentElement, iframe);
+    } else if (this.mentionListConfig.position === 'fixed') {
 
-      coords.top = caretRelativeToView.top - parentRelativeToContainer.top + nativeParentElement.offsetTop - scrollTop;
-      coords.left = caretRelativeToView.left - parentRelativeToContainer.left + nativeParentElement.offsetLeft - scrollLeft;
     }
-    const el: HTMLElement = this._element.nativeElement;
-    el.style.position = 'absolute';
-    el.style.left = coords.left + 'px';
-    el.style.top = coords.top + 'px';
 
+    const coords = positioning.coords;
+    const el = positioning.el;
+
+    this.checkAndFixOutsideViewList(nativeParentElement, iframe, el, coords);
+  }
+
+  private checkAndFixOutsideViewList(nativeParentElement: HTMLInputElement, iframe: HTMLIFrameElement, el, coords) {
     this.dropdown.nativeElement.style.height = this.list.nativeElement.style.height = 'auto';
     this.dropdown.nativeElement.style.opacity = 0;
 
-    setTimeout( () => {
+    setTimeout(() => {
       const listViewportOffset: ClientRect = this.list.nativeElement.getBoundingClientRect();
       const dropdownViewportOffset: ClientRect = this.dropdown.nativeElement.getBoundingClientRect();
 
@@ -182,6 +174,36 @@ export class MentionListComponent implements OnInit  {
         nativeParentElement.focus();
       }
     }, 0);
+  }
+
+  private setRelativePositioning(nativeParentElement: HTMLInputElement, iframe: HTMLIFrameElement) {
+    let coords = {top: 0, left: 0};
+
+    if (isInputOrTextAreaElement(nativeParentElement)) {
+      // parent elements need to have position:relative for this to work correctly?
+      coords = getCaretCoordinates(nativeParentElement, nativeParentElement.selectionStart);
+      coords.top = nativeParentElement.offsetTop + coords.top + 16;
+      coords.left = nativeParentElement.offsetLeft + coords.left;
+    } else if (iframe) {
+      const context: { iframe: HTMLIFrameElement, parent: Element } = {iframe: iframe, parent: iframe.offsetParent};
+      coords = getContentEditableCaretCoords(context);
+    } else {
+      // bounding rectangles are relative to view, offsets are relative to container?
+      const doc = document.documentElement;
+      const caretRelativeToView = getContentEditableCaretCoords({iframe: iframe});
+      const parentRelativeToContainer: ClientRect = nativeParentElement.getBoundingClientRect();
+      const scrollLeft = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+      const scrollTop = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
+
+      coords.top = caretRelativeToView.top - parentRelativeToContainer.top + nativeParentElement.offsetTop - scrollTop;
+      coords.left = caretRelativeToView.left - parentRelativeToContainer.left + nativeParentElement.offsetLeft - scrollLeft;
+    }
+    const el: HTMLElement = this._element.nativeElement;
+    el.style.position = 'absolute';
+    el.style.left = coords.left + 'px';
+    el.style.top = coords.top + 'px';
+
+    return {coords, el};
   }
 
   get activeItem() {
