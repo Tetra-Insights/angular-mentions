@@ -122,21 +122,20 @@ export class MentionListComponent implements OnInit  {
 
   // lots of confusion here between relative coordinates and containers
   position(nativeParentElement: HTMLInputElement, iframe: HTMLIFrameElement = null) {
-    let positioning;
+    let coords;
 
     if (this.mentionListConfig.position === 'relative') {
-      positioning = this.setRelativePositioning(nativeParentElement, iframe);
+      coords = this.setRelativePositioning(nativeParentElement, iframe);
     } else if (this.mentionListConfig.position === 'fixed') {
 
     }
 
-    const coords = positioning.coords;
-    const el = positioning.el;
-
-    this.checkAndFixOutsideViewList(nativeParentElement, iframe, el, coords);
+    this.checkAndFixOutsideViewList(nativeParentElement, iframe, coords);
   }
 
-  private checkAndFixOutsideViewList(nativeParentElement: HTMLInputElement, iframe: HTMLIFrameElement, el, coords) {
+  private checkAndFixOutsideViewList(nativeParentElement: HTMLInputElement, iframe: HTMLIFrameElement, coords) {
+    const el: HTMLElement = this._element.nativeElement;
+
     this.dropdown.nativeElement.style.height = this.list.nativeElement.style.height = 'auto';
     this.dropdown.nativeElement.style.opacity = 0;
 
@@ -176,7 +175,7 @@ export class MentionListComponent implements OnInit  {
     }, 0);
   }
 
-  private setRelativePositioning(nativeParentElement: HTMLInputElement, iframe: HTMLIFrameElement) {
+  private setRelativePositioning(nativeParentElement: HTMLInputElement, iframe: HTMLIFrameElement): {top: number, left: number} {
     let coords = {top: 0, left: 0};
 
     if (isInputOrTextAreaElement(nativeParentElement)) {
@@ -203,7 +202,7 @@ export class MentionListComponent implements OnInit  {
     el.style.left = coords.left + 'px';
     el.style.top = coords.top + 'px';
 
-    return {coords, el};
+    return coords;
   }
 
   get activeItem() {
