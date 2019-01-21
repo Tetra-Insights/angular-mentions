@@ -18,9 +18,24 @@
 <div [mention]="[{charTrigger: '@', items: items}, {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true}]"
      class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
 
-<h3>Content Editable with auto-complete list custom appearance</h3>
-<div [mention]="items" [mentionListConfig]="{headerTemplate: customHeader, listClasses: 'custom-list'}" class="form-control" contenteditable="true"
-     style="border:1px lightgrey solid;min-height:88px"></div>.
+<h3>Content Editable with customized appearance list </h3>
+<div [mention]="items"
+     [mentionListConfig]="{headerTemplate: customHeader, listClasses: 'scrollable-menu pretty-scrollbar custom-list'}"
+     class="form-control" contenteditable="true"
+     style="border:1px lightgrey solid;min-height:88px"></div>
+
+<h3>Active on Hover</h3>
+<div [mention]="items" [mentionListConfig]="{activeOnHover: true}" class="form-control" contenteditable="true"
+     style="border:1px lightgrey solid;min-height:88px"></div>
+
+<h3>Content Editable with Multiple Triggers and Item Templates (@, #)</h3>
+<div [mention]="[{charTrigger: '@', items: items, itemTemplate: userTemplate},
+      {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true}]"
+     class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
+
+<h3>Trigger # char with required space before it in order to allow multiple words tagging like #awesome summer#</h3>
+<div [mention]="[{charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
+     class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
 
 <ng-template #customHeader>
   <div class="header" style="user-select: none;">
@@ -28,6 +43,14 @@
     <span><strong>↵</strong> to select</span>
     <span><strong>esc</strong> to dismiss</span>
   </div>
+</ng-template>
+
+<ng-template #userTemplate let-item="item">
+  <strong>@{{item.label}}</strong>
+</ng-template>
+
+<ng-template #tagsTemplate let-item="item">
+  <strong><i>{{item.label}}</i></strong>
 </ng-template>
 
 <!--<h3>Embedded Editor</h3>-->

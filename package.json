@@ -10,7 +10,7 @@
   "main": "src/mention/index.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/TetraInsights/angular-mentions"
+    "url": "git+https://github.com/TetraInsights/angular-mentions"
   },
   "author": "Dan MacFarlane",
   "license": "MIT",
@@ -22,7 +22,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "dist": "ngc -p src/mention"
+    "dist": "ngc -p src/mention",
+    "install": "npm run dist"
   },
   "private": false,
   "peerDependencies": {
@@ -60,7 +61,5 @@
     "typescript": "~2.1.0",
     "zone.js": "^0.8.4"
   },
-  "files": [
-    "mention"
-  ]
+  "files": ["src/mention"]
 }

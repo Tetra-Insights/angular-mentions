@@ -8,8 +8,9 @@ import {getCaretCoordinates} from './caret-coords';
 
 export interface IMentionListConfig {
   headerTemplate?: TemplateRef<any>;
-  itemTemplate?: TemplateRef<any>;
+  containerClasses?: string;
   listClasses?: string;
+  activeOnHover?: boolean;
 }
 
 /**
@@ -26,14 +27,41 @@ export interface IMentionListConfig {
       height: auto;
       max-height: 300px;
       overflow: auto;
+      margin-bottom: 0;
     }
+  `, `
+    .dropdown-menu {
+      display: block;
+    }
+  `, `.dropdown-menu ul {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+  `, `
+    .dropdown-menu ul > li > a {
+      display: block;
+      padding: 3px 20px;
+      clear: both;
+      font-weight: 400;
+      line-height: 1.42857143;
+      color: #333;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+  `, `.dropdown-menu ul > li > a:hover {
+    text-decoration: none;
+    background-color: #f5f5f5;
+  }
   `, `
     [hidden] {
       display: none;
     }
   `, `
-    li.active {
-      background-color: #f7f7f9;
+    .dropdown-menu ul>.active>a, .dropdown-menu ul>.active>a:focus, .dropdown-menu ul>.active>a:hover {
+      color: #fff;
+      text-decoration: none;
+      background-color: #337ab7;
+      outline: 0;
     }
   `],
   template: `
@@ -41,27 +69,37 @@ export interface IMentionListConfig {
       {{item[labelKey]}}
     </ng-template>
 
-    <ul #list [hidden]="hidden"
-        [class]="mentionListConfig.listClasses ? mentionListConfig.listClasses : 'dropdown-menu scrollable-menu'">
+    <div #dropdown class="dropdown-menu" [hidden]="hidden">
       <ng-container *ngIf="mentionListConfig" [ngTemplateOutlet]="mentionListConfig.headerTemplate"></ng-container>
-      <li *ngFor="let item of items; let i = index" [class.active]="activeIndex==i">
-        <a class="dropdown-item" (mousedown)="activeIndex=i;itemClick.emit();$event.preventDefault()">
-          <ng-template [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{'item':item}"></ng-template>
-        </a>
-      </li>
-    </ul>
-  `
+      <ul #list [class]="mentionListConfig.listClasses ? mentionListConfig.listClasses : 'scrollable-menu'">
+        <li *ngFor="let item of items; let i = index" [class.active]="activeIndex==i">
+          <a class="dropdown-item" (mousedown)="activeIndex=i;itemClick.emit();$event.preventDefault()" 
+             (mouseenter)="mentionListConfig.activeOnHover && activateItem(i)" >
+            <ng-template [ngTemplateOutlet]="_itemTemplate" [ngTemplateOutletContext]="{'item':item}"></ng-template>
+          </a>
+        </li>
+      </ul>
+    </div>`
 })
-export class MentionListComponent implements OnInit {
+export class MentionListComponent implements OnInit  {
   @Input() mentionListConfig: IMentionListConfig;
   @Input() labelKey = 'label';
 
   @Output() itemClick = new EventEmitter();
 
   @ViewChild('list') list: ElementRef;
+  @ViewChild('dropdown') dropdown: ElementRef;
   @ViewChild('defaultItemTemplate') defaultItemTemplate: TemplateRef<any>;
 
-  itemTemplate: TemplateRef<any>;
+  @Input() set itemTemplate(template: TemplateRef<any>) {
+    if (!template) {
+      this._itemTemplate = this.defaultItemTemplate;
+    } else {
+      this._itemTemplate = template;
+    }
+  };
+
+  _itemTemplate: TemplateRef<any>;
   items = [];
   activeIndex = 0;
   hidden = false;
@@ -74,14 +112,15 @@ export class MentionListComponent implements OnInit {
       this.mentionListConfig = {listClasses: ''};
     }
 
-    if (!this.mentionListConfig.itemTemplate) {
-      this.itemTemplate = this.defaultItemTemplate;
+    if (!this._itemTemplate) {
+      this._itemTemplate = this.defaultItemTemplate;
     }
   }
 
   // lots of confusion here between relative coordinates and containers
   position(nativeParentElement: HTMLInputElement, iframe: HTMLIFrameElement = null) {
     let coords = {top: 0, left: 0};
+
     if (isInputOrTextAreaElement(nativeParentElement)) {
       // parent elements need to have position:relative for this to work correctly?
       coords = getCaretCoordinates(nativeParentElement, nativeParentElement.selectionStart);
@@ -91,13 +130,12 @@ export class MentionListComponent implements OnInit {
       const context: { iframe: HTMLIFrameElement, parent: Element } = {iframe: iframe, parent: iframe.offsetParent};
       coords = getContentEditableCaretCoords(context);
     } else {
-      const doc = document.documentElement;
-      const scrollLeft = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
-      const scrollTop = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
-
       // bounding rectangles are relative to view, offsets are relative to container?
+      const doc = document.documentElement;
       const caretRelativeToView = getContentEditableCaretCoords({iframe: iframe});
       const parentRelativeToContainer: ClientRect = nativeParentElement.getBoundingClientRect();
+      const scrollLeft = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+      const scrollTop = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
 
       coords.top = caretRelativeToView.top - parentRelativeToContainer.top + nativeParentElement.offsetTop - scrollTop;
       coords.left = caretRelativeToView.left - parentRelativeToContainer.left + nativeParentElement.offsetLeft - scrollLeft;
@@ -106,10 +144,57 @@ export class MentionListComponent implements OnInit {
     el.style.position = 'absolute';
     el.style.left = coords.left + 'px';
     el.style.top = coords.top + 'px';
+
+    this.dropdown.nativeElement.style.height = this.list.nativeElement.style.height = 'auto';
+    this.dropdown.nativeElement.style.opacity = 0;
+
+    setTimeout( () => {
+      const listViewportOffset: ClientRect = this.list.nativeElement.getBoundingClientRect();
+      const dropdownViewportOffset: ClientRect = this.dropdown.nativeElement.getBoundingClientRect();
+
+      const doc = document.documentElement;
+      const fontHeight = isInputOrTextAreaElement(nativeParentElement)
+        ? getCaretCoordinates(nativeParentElement, nativeParentElement.selectionStart).top + 16
+        : getContentEditableCaretCoords({iframe: iframe}).height + 9;
+
+      if (listViewportOffset.bottom > doc.clientHeight) {
+        let downHeight = dropdownViewportOffset.height - (listViewportOffset.bottom - doc.clientHeight);
+        let upHeight = dropdownViewportOffset.top - fontHeight;
+
+        downHeight = (downHeight > 300 ? 300 : downHeight);
+        upHeight = (upHeight > 300 ? 300 : upHeight);
+
+        if (downHeight >= upHeight) {
+          this.list.nativeElement.style.height = (listViewportOffset.height > downHeight ? downHeight : listViewportOffset.height) + 'px';
+        } else {
+          const height = listViewportOffset.height > upHeight ? upHeight : listViewportOffset.height;
+          this.list.nativeElement.style.height = height + 'px';
+          el.style.top = (coords.top - height - fontHeight) + 'px';
+        }
+      }
+
+      if (listViewportOffset.right > doc.clientWidth) {
+        el.style.left = (coords.left - listViewportOffset.width) + 'px';
+      }
+
+      this.dropdown.nativeElement.style.opacity = 1;
+      if (isInputOrTextAreaElement(nativeParentElement)) {
+        nativeParentElement.focus();
+      }
+    }, 0);
   }
 
   get activeItem() {
     return this.items[this.activeIndex];
+  }
+
+  hide() {
+    this.dropdown.nativeElement.style.height = this.list.nativeElement.style.height = 'auto';
+    this.hidden = true;
+  }
+
+  activateItem(index) {
+    this.activeIndex = index;
   }
 
   activateNextItem() {

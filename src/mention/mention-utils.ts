@@ -123,7 +123,8 @@ export function getContentEditableCaretCoords(ctx: { iframe: HTMLIFrameElement, 
 
   const coordinates = {
     left: 0,
-    top: markerEl.offsetHeight
+    top: markerEl.offsetHeight,
+    height: markerEl.offsetHeight,
   };
 
   localToRelativeCoordinates(ctx, markerEl, coordinates);

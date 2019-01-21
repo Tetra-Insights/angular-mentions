@@ -22,6 +22,8 @@ export interface ItemsDescription {
   startsWithCharTrigger: boolean;
   labelKey?: string;
   mentionSelect?: IMentionLabelSelector;
+  itemTemplate?: TemplateRef<any>;
+  spaceSeparated?: boolean;
 }
 
 export interface IMentionConfig {
@@ -84,6 +86,7 @@ export class MentionDirective implements OnInit, OnChanges {
   searchString: string;
   startPos: number;
   items: any[];
+  itemTemplate: TemplateRef<any>;
   multipleItems: ItemsDescription[];
   currentSelectedMultiple: ItemsDescription;
   startNode;
@@ -128,6 +131,7 @@ export class MentionDirective implements OnInit, OnChanges {
         .map(elem => ({
           ...elem,
           items: this.initializeItemsList(elem.items, elem.labelKey),
+          labelKey: elem.labelKey || this.labelKey,
           mentionSelect: elem.mentionSelect || this.defaultMentionSelectFunctionCreator(elem)
         }));
     }
@@ -188,7 +192,7 @@ export class MentionDirective implements OnInit, OnChanges {
     this.stopEvent(event);
     this.stopSearch = true;
     if (this.searchList) {
-      this.searchList.hidden = true;
+      this.searchList.hide();
     }
   }
 
@@ -224,11 +228,15 @@ export class MentionDirective implements OnInit, OnChanges {
       if (this.multiplesTriggers) {
         this.initializeItemsFromMultiple(charPressed);
       }
-      this.showSearchList(nativeElement);
-      this.updateSearchList();
+
+      if (!this.multiplesTriggers || !this.currentSelectedMultiple.spaceSeparated ||
+        val.length === 0 || [31, 160].includes(val.charCodeAt(val.length - 1))) {
+        this.showSearchList(nativeElement);
+        this.updateSearchList();
+      }
     } else if (this.startPos >= 0 && !this.stopSearch) {
       if (pos <= this.startPos) {
-        this.searchList.hidden = true;
+        this.searchList.hide();
       } else if (event.keyCode !== KEY_SHIFT && // ignore shift when pressed alone, but not when used with another key
         !event.metaKey &&
         !event.altKey &&
@@ -246,7 +254,7 @@ export class MentionDirective implements OnInit, OnChanges {
         } else if (!this.searchList.hidden) {
           if (event.keyCode === KEY_TAB || event.keyCode === KEY_ENTER) {
             this.stopEvent(event);
-            this.searchList.hidden = true;
+            this.searchList.hide();
             // value is inserted without a trailing space for consistency
             // between element types (div and iframe do not preserve the space)
             insertValue(nativeElement, this.startPos, pos,
@@ -261,7 +269,7 @@ export class MentionDirective implements OnInit, OnChanges {
             return false;
           } else if (event.keyCode === KEY_ESCAPE) {
             this.stopEvent(event);
-            this.searchList.hidden = true;
+            this.searchList.hide();
             this.stopSearch = true;
             return false;
           } else if (event.keyCode === KEY_DOWN) {
@@ -295,6 +303,8 @@ export class MentionDirective implements OnInit, OnChanges {
     const triggerCharData = this.multipleItems.find(elem => elem.charTrigger === char);
     this.currentSelectedMultiple = triggerCharData;
     this.items = triggerCharData.items;
+    this.itemTemplate = triggerCharData.itemTemplate;
+    this.labelKey = triggerCharData.labelKey;
     this.mentionSelect = triggerCharData.mentionSelect;
   }
 
@@ -331,7 +341,6 @@ export class MentionDirective implements OnInit, OnChanges {
       this.searchList = componentRef.instance;
       this.searchList.position(nativeElement, this.iframe);
       this.searchList.mentionListConfig = this.mentionListConfig;
-      this.searchList.labelKey = this.labelKey;
       componentRef.instance['itemClick'].subscribe(() => {
         nativeElement.focus();
         const fakeKeydown = {'keyCode': KEY_ENTER, 'wasClick': true};
@@ -342,5 +351,7 @@ export class MentionDirective implements OnInit, OnChanges {
       this.searchList.position(nativeElement, this.iframe);
       window.setTimeout(() => this.searchList.resetScroll());
     }
+    this.searchList.itemTemplate = this.itemTemplate;
+    this.searchList.labelKey = this.labelKey;
   }
 }
