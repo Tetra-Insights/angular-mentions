@@ -139,13 +139,11 @@ export class MentionListComponent implements OnInit  {
   }
 
   private getFixedCoords(nativeParentElement: HTMLInputElement, iframe: HTMLIFrameElement = null): {top: number, left: number} {
-    let coords = {top: 0, left: 0};
-
-    const caretCoords = isInputOrTextAreaElement(nativeParentElement)
+    const coords: {top: number, left: number, height?: number } = isInputOrTextAreaElement(nativeParentElement)
       ? getCaretCoordinates(nativeParentElement, nativeParentElement.selectionStart)
-      : getContentEditableCaretCoords({iframe: iframe});
+      : getContentEditableCaretCoords({iframe: iframe}, true);
 
-
+    coords.top += coords.height ? coords.height : 16;
 
     return coords;
   }

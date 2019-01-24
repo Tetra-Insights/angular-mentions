@@ -99,7 +99,8 @@ function getWindowSelection(iframe: HTMLIFrameElement): Selection {
   }
 }
 
-export function getContentEditableCaretCoords(ctx: { iframe: HTMLIFrameElement, parent?: Element }) {
+export function getContentEditableCaretCoords(ctx: { iframe: HTMLIFrameElement, parent?: Element }, relativeToViewport = false)
+  : { top: number; left: number; height: number } {
   const markerTextChar = '\ufeff';
   const markerId = 'sel_' + new Date().getTime() + '_' + Math.random().toString().substr(2);
   const doc = getDocument(ctx ? ctx.iframe : null);
@@ -120,6 +121,13 @@ export function getContentEditableCaretCoords(ctx: { iframe: HTMLIFrameElement, 
   range.insertNode(markerEl);
   sel.removeAllRanges();
   sel.addRange(prevRange);
+
+  const relativeToViewPortCoords: ClientRect = range.getBoundingClientRect();
+
+  if (relativeToViewport) {
+    markerEl.parentNode.removeChild(markerEl);
+    return {top: relativeToViewPortCoords.top, left: relativeToViewPortCoords.left, height: relativeToViewPortCoords.height};
+  }
 
   const coordinates = {
     left: 0,

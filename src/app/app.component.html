@@ -37,6 +37,22 @@
 <div [mention]="[{charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
      class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
 
+<h3>Fixed Positioning</h3>
+<div style="overflow: scroll; height: 200px; width: 100%;border:1px lightgrey solid; min-height:88px">
+  <div [mention]="[{charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
+       [mentionListConfig]="{position: 'fixed'}"
+       class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
+  <div [mention]="[{charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
+       [mentionListConfig]="{position: 'fixed'}"
+       class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
+  <div [mention]="[{charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
+       [mentionListConfig]="{position: 'fixed'}"
+       class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
+  <div [mention]="[{charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
+       [mentionListConfig]="{position: 'fixed'}"
+       class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
+</div>
+
 <ng-template #customHeader>
   <div class="header" style="user-select: none;">
     <span><strong>↑</strong> <strong>↓</strong> to navigate</span>
