@@ -291,9 +291,14 @@ export class MentionDirective implements OnInit, OnChanges {
           if (event.keyCode !== KEY_BACKSPACE) {
             mention += charPressed;
           }
-          this.searchString = mention;
-          this.searchTerm.emit(this.searchString);
-          this.updateSearchList();
+
+          if (this.triggerChar.includes(mention)) {
+            this.searchList.hide();
+          } else {
+            this.searchString = mention;
+            this.searchTerm.emit(this.searchString);
+            this.updateSearchList();
+          }
         }
       }
     }
