@@ -187,11 +187,11 @@ export class MentionListComponent implements OnInit  {
 
       const doc = document.documentElement;
       const fontHeight = isInputOrTextAreaElement(nativeParentElement)
-        ? getCaretCoordinates(nativeParentElement, nativeParentElement.selectionStart).top + 16
-        : getContentEditableCaretCoords({iframe: iframe}).height + 9;
+        ? getCaretCoordinates(nativeParentElement, nativeParentElement.selectionStart).top
+        : getContentEditableCaretCoords({iframe: iframe}).height;
 
       if (listViewportOffset.bottom > doc.clientHeight) {
-        let downHeight = dropdownViewportOffset.height - (listViewportOffset.bottom - doc.clientHeight);
+        let downHeight = dropdownViewportOffset.height - (dropdownViewportOffset.bottom - doc.clientHeight);
         let upHeight = dropdownViewportOffset.top - fontHeight;
 
         downHeight = (downHeight > 300 ? 300 : downHeight);
@@ -202,7 +202,8 @@ export class MentionListComponent implements OnInit  {
         } else {
           const height = listViewportOffset.height > upHeight ? upHeight : listViewportOffset.height;
           this.list.nativeElement.style.height = height + 'px';
-          el.style.top = (coords.top - height - fontHeight) + 'px';
+          const heightDiff = height - listViewportOffset.height;
+          el.style.top = (coords.top - (dropdownViewportOffset.height + heightDiff) - fontHeight) + 'px';
         }
       }
 
