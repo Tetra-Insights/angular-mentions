@@ -24,6 +24,8 @@ export interface ItemsDescription {
   mentionSelect?: IMentionLabelSelector;
   itemTemplate?: TemplateRef<any>;
   spaceSeparated?: boolean;
+  headerTemplate?: TemplateRef<any>;
+  footerTemplate?: TemplateRef<any>;
 }
 
 export interface IMentionConfig {
@@ -334,6 +336,14 @@ export class MentionDirective implements OnInit, OnChanges {
     }
     // update the search list
     if (this.searchList) {
+      this.searchList.mentionListConfig.headerTemplate = this.currentSelectedMultiple.headerTemplate
+        ? this.currentSelectedMultiple.headerTemplate
+        : this.mentionListConfig.headerTemplate;
+
+      this.searchList.mentionListConfig.footerTemplate = this.currentSelectedMultiple.footerTemplate
+        ? this.currentSelectedMultiple.footerTemplate
+        : this.mentionListConfig.footerTemplate;
+
       this.searchList.items = matches;
       this.searchList.hidden = matches.length === 0;
     }

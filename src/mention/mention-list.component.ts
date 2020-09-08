@@ -8,10 +8,12 @@ import {getCaretCoordinates} from './caret-coords';
 
 export interface IMentionListConfig {
   headerTemplate?: TemplateRef<any>;
+  footerTemplate?: TemplateRef<any>;
   containerClasses?: string;
   listClasses?: string;
   activeOnHover?: boolean;
   position?: 'relative' | 'fixed';
+  searchString?: string;
 }
 
 /**
@@ -74,12 +76,15 @@ export interface IMentionListConfig {
       <ng-container *ngIf="mentionListConfig" [ngTemplateOutlet]="mentionListConfig.headerTemplate"></ng-container>
       <ul #list [class]="mentionListConfig.listClasses ? mentionListConfig.listClasses : 'scrollable-menu'">
         <li *ngFor="let item of items; let i = index" [class.active]="activeIndex==i">
-          <a class="dropdown-item" (mousedown)="activeIndex=i;itemClick.emit();$event.preventDefault()" 
-             (mouseenter)="mentionListConfig.activeOnHover && activateItem(i)" >
+          <a class="dropdown-item" (mousedown)="activeIndex=i;itemClick.emit();$event.preventDefault()"
+             (mouseenter)="mentionListConfig.activeOnHover && activateItem(i)">
             <ng-template [ngTemplateOutlet]="_itemTemplate" [ngTemplateOutletContext]="{'item':item}"></ng-template>
           </a>
         </li>
       </ul>
+      <ng-container *ngIf="mentionListConfig && mentionListConfig.footerTemplate"
+                    [ngTemplateOutlet]="mentionListConfig.footerTemplate"
+                    [ngTemplateOutletContext]="{'searchString': mentionListConfig.searchString}"></ng-container>
     </div>`
 })
 export class MentionListComponent implements OnInit  {
