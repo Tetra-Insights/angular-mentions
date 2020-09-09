@@ -13,7 +13,6 @@ export interface IMentionListConfig {
   listClasses?: string;
   activeOnHover?: boolean;
   position?: 'relative' | 'fixed';
-  searchString?: string;
 }
 
 /**
@@ -82,14 +81,15 @@ export interface IMentionListConfig {
           </a>
         </li>
       </ul>
-      <ng-container *ngIf="mentionListConfig && mentionListConfig.footerTemplate"
+      <ng-template *ngIf="mentionListConfig && mentionListConfig.footerTemplate"
                     [ngTemplateOutlet]="mentionListConfig.footerTemplate"
-                    [ngTemplateOutletContext]="{'searchString': mentionListConfig.searchString}"></ng-container>
+                    [ngTemplateOutletContext]="{'searchString': searchString}"></ng-template>
     </div>`
 })
 export class MentionListComponent implements OnInit  {
   @Input() mentionListConfig: IMentionListConfig;
   @Input() labelKey = 'label';
+  @Input() searchString = '';
 
   @Output() itemClick = new EventEmitter();
 

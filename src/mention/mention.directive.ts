@@ -26,6 +26,7 @@ export interface ItemsDescription {
   spaceSeparated?: boolean;
   headerTemplate?: TemplateRef<any>;
   footerTemplate?: TemplateRef<any>;
+  hideOnNoMatches?: boolean; // Activating this option will disable automatically spaceSeparated one.
 }
 
 export interface IMentionConfig {
@@ -134,7 +135,8 @@ export class MentionDirective implements OnInit, OnChanges {
           ...elem,
           items: this.initializeItemsList(elem.items, elem.labelKey),
           labelKey: elem.labelKey || this.labelKey,
-          mentionSelect: elem.mentionSelect || this.defaultMentionSelectFunctionCreator(elem)
+          mentionSelect: elem.mentionSelect || this.defaultMentionSelectFunctionCreator(elem),
+          hideOnNoMatches: elem.hideOnNoMatches === undefined ? true : elem.hideOnNoMatches
         }));
     }
   }
@@ -191,10 +193,11 @@ export class MentionDirective implements OnInit, OnChanges {
   }
 
   blurHandler(event: any) {
+    console.log(event);
     this.stopEvent(event);
     this.stopSearch = true;
     if (this.searchList) {
-      this.searchList.hide();
+      // this.searchList.hide();
     }
   }
 
@@ -231,7 +234,7 @@ export class MentionDirective implements OnInit, OnChanges {
         this.initializeItemsFromMultiple(charPressed);
       }
 
-      if (!this.multiplesTriggers || !this.currentSelectedMultiple.spaceSeparated ||
+      if (!this.multiplesTriggers || (!this.currentSelectedMultiple.spaceSeparated && this.currentSelectedMultiple.hideOnNoMatches) ||
         val.length === 0 || [31, 160].includes(val.charCodeAt(val.length - 1))) {
         this.showSearchList(nativeElement);
         this.updateSearchList();
@@ -247,6 +250,11 @@ export class MentionDirective implements OnInit, OnChanges {
       ) {
         if (event.keyCode === KEY_SPACE) {
           this.startPos = -1;
+
+          if (!this.currentSelectedMultiple.spaceSeparated || !this.currentSelectedMultiple.hideOnNoMatches) {
+            this.searchList.hide();
+            return;
+          }
         } else if (event.keyCode === KEY_BACKSPACE && pos > 0) {
           pos--;
           if (pos === 0) {
@@ -317,11 +325,16 @@ export class MentionDirective implements OnInit, OnChanges {
 
   updateSearchList() {
     let matches: any[] = [];
+
+    let searchStringLowerCase = this.currentSelectedMultiple && this.currentSelectedMultiple.startsWithCharTrigger
+      ? this.currentSelectedMultiple.charTrigger
+      : '';
+
     if (this.items) {
       let objects = this.items;
       // disabling the search relies on the async operation to do the filtering
       if (!this.disableSearch && this.searchString) {
-        let searchStringLowerCase = this.searchString.toLowerCase();
+        searchStringLowerCase = this.searchString.toLowerCase();
 
         if (this.currentSelectedMultiple && this.currentSelectedMultiple.startsWithCharTrigger) {
           searchStringLowerCase = this.currentSelectedMultiple.charTrigger + searchStringLowerCase;
@@ -336,16 +349,24 @@ export class MentionDirective implements OnInit, OnChanges {
     }
     // update the search list
     if (this.searchList) {
-      this.searchList.mentionListConfig.headerTemplate = this.currentSelectedMultiple.headerTemplate
-        ? this.currentSelectedMultiple.headerTemplate
-        : this.mentionListConfig.headerTemplate;
+      this.searchList.mentionListConfig = {
+        ...this.mentionListConfig,
+        footerTemplate: this.currentSelectedMultiple.headerTemplate
+          ? this.currentSelectedMultiple.headerTemplate
+          : this.mentionListConfig.headerTemplate
+      };
 
-      this.searchList.mentionListConfig.footerTemplate = this.currentSelectedMultiple.footerTemplate
-        ? this.currentSelectedMultiple.footerTemplate
-        : this.mentionListConfig.footerTemplate;
+      this.searchList.mentionListConfig = {
+          ...this.mentionListConfig,
+          footerTemplate: this.currentSelectedMultiple.footerTemplate
+            ? this.currentSelectedMultiple.footerTemplate
+            : this.mentionListConfig.footerTemplate
+        };
+
+      this.searchList.searchString = searchStringLowerCase;
 
       this.searchList.items = matches;
-      this.searchList.hidden = matches.length === 0;
+      this.searchList.hidden = this.currentSelectedMultiple.hideOnNoMatches && matches.length === 0;
     }
   }
 
