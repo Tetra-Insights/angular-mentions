@@ -197,7 +197,7 @@ export class MentionDirective implements OnInit, OnChanges {
     this.stopEvent(event);
     this.stopSearch = true;
     if (this.searchList) {
-      // this.searchList.hide();
+      this.searchList.hide();
     }
   }
 
