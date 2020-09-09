@@ -66,8 +66,8 @@
      class="form-control" contenteditable="true"
      style="border:1px lightgrey solid;min-height:88px"></div>
 
-<ng-template #customHeader>
-  <div class="header" style="user-select: none;">
+<ng-template #customHeader let-items="items">
+  <div class="header" style="user-select: none;" *ngIf="items.length > 0">
     <span><strong>↑</strong> <strong>↓</strong> to navigate</span>
     <span><strong>↵</strong> to select</span>
     <span><strong>esc</strong> to dismiss</span>

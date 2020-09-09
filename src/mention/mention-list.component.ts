@@ -72,7 +72,9 @@ export interface IMentionListConfig {
     </ng-template>
 
     <div #dropdown class="dropdown-menu" [hidden]="hidden">
-      <ng-container *ngIf="mentionListConfig" [ngTemplateOutlet]="mentionListConfig.headerTemplate"></ng-container>
+      <ng-container *ngIf="mentionListConfig"
+                    [ngTemplateOutlet]="mentionListConfig.headerTemplate" 
+                    [ngTemplateOutletContext]="{'searchString': searchString, 'items': items}"></ng-container>
       <ul #list [class]="mentionListConfig.listClasses ? mentionListConfig.listClasses : 'scrollable-menu'">
         <li *ngFor="let item of items; let i = index" [class.active]="activeIndex==i">
           <a class="dropdown-item" (mousedown)="activeIndex=i;itemClick.emit();$event.preventDefault()"
@@ -83,7 +85,7 @@ export interface IMentionListConfig {
       </ul>
       <ng-template *ngIf="mentionListConfig && mentionListConfig.footerTemplate"
                     [ngTemplateOutlet]="mentionListConfig.footerTemplate"
-                    [ngTemplateOutletContext]="{'searchString': searchString}"></ng-template>
+                    [ngTemplateOutletContext]="{'searchString': searchString, 'items': items}"></ng-template>
     </div>`
 })
 export class MentionListComponent implements OnInit  {
