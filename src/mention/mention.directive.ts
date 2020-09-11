@@ -117,12 +117,12 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
   // option to limit the number of items shown in the pop-up menu
   private maxItems: number = -1;
 
+  private listItemClickSubscription: Subscription;
+  private listHideSubscription: Subscription;
+
   // optional function to format the selected item before inserting the text
   private mentionSelect: IMentionLabelSelector
     = (item: any, labelKey: string = this.labelKey, triggerChar?: string) => this.triggerChar + item[labelKey];
-
-  private listItemClickSubscription: Subscription;
-  private listHideSubscription: Subscription;
 
   constructor(
     private _element: ElementRef,
