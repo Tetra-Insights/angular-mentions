@@ -412,6 +412,7 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Following this article: https://medium.com/@ole.ersoy/cleaning-up-subscriptions-to-dynamic-component-event-emitters-ad08c838c7a8
     if (this.listItemClickSubscription) {
       this.listItemClickSubscription.unsubscribe();
     }
