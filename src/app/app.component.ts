@@ -15,8 +15,12 @@ export class AppComponent {
   items: string[] = COMMON_NAMES;
   tagsItems: string[] = COMMON_TAGS;
 
-  onFooterButtonClick($event) {
-    $event.preventDefault();
-    console.log('clicked but not blurred!');
+  onMentionHide() {
+    console.log('hide');
   }
+
+  onMentionVisible() {
+    console.log('visible');
+  }
+
 }

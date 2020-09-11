@@ -1,8 +1,9 @@
-import {Directive, ElementRef, Input, ComponentFactoryResolver, ViewContainerRef, TemplateRef} from '@angular/core';
+import {Directive, ElementRef, Input, ComponentFactoryResolver, ViewContainerRef, TemplateRef, OnDestroy} from '@angular/core';
 import {EventEmitter, Output, OnInit, OnChanges, SimpleChanges} from '@angular/core';
 
 import {IMentionListConfig, MentionListComponent} from './mention-list.component';
 import {getValue, insertValue, getCaretPosition, setCaretPosition} from './mention-utils';
+import {Subscription} from 'rxjs/Subscription';
 
 const KEY_BACKSPACE = 8;
 const KEY_TAB = 9;
@@ -53,7 +54,7 @@ export type IMentionLabelSelector = (item: any, labelKey?: string, triggerChar?:
     '(blur)': 'blurHandler($event)'
   }
 })
-export class MentionDirective implements OnInit, OnChanges {
+export class MentionDirective implements OnInit, OnChanges, OnDestroy {
 
   @Input() set mention(items: any[] | ItemsDescription[]) {
     if (items.length > 0) {
@@ -84,7 +85,10 @@ export class MentionDirective implements OnInit, OnChanges {
   @Input() mentionListConfig: IMentionListConfig;
 
   // event emitted whenever the search term changes
-  @Output() searchTerm = new EventEmitter();
+  @Output() searchTerm = new EventEmitter<string>();
+
+  @Output() mentionVisible = new EventEmitter();
+  @Output() mentionHide = new EventEmitter();
 
   searchString: string;
   startPos: number;
@@ -116,6 +120,9 @@ export class MentionDirective implements OnInit, OnChanges {
   // optional function to format the selected item before inserting the text
   private mentionSelect: IMentionLabelSelector
     = (item: any, labelKey: string = this.labelKey, triggerChar?: string) => this.triggerChar + item[labelKey];
+
+  private listItemClickSubscription: Subscription;
+  private listHideSubscription: Subscription;
 
   constructor(
     private _element: ElementRef,
@@ -349,24 +356,32 @@ export class MentionDirective implements OnInit, OnChanges {
     }
     // update the search list
     if (this.searchList) {
-      this.searchList.mentionListConfig = {
-        ...this.mentionListConfig,
-        footerTemplate: this.currentSelectedMultiple.headerTemplate
-          ? this.currentSelectedMultiple.headerTemplate
-          : this.mentionListConfig.headerTemplate
-      };
+      if (this.currentSelectedMultiple) {
+        this.searchList.mentionListConfig = {
+          ...this.mentionListConfig,
+          headerTemplate: this.currentSelectedMultiple.headerTemplate
+            ? this.currentSelectedMultiple.headerTemplate
+            : this.mentionListConfig
+              ? this.mentionListConfig.headerTemplate
+              : undefined
+        };
 
-      this.searchList.mentionListConfig = {
+        this.searchList.mentionListConfig = {
           ...this.mentionListConfig,
           footerTemplate: this.currentSelectedMultiple.footerTemplate
             ? this.currentSelectedMultiple.footerTemplate
-            : this.mentionListConfig.footerTemplate
+            : this.mentionListConfig
+              ? this.mentionListConfig.footerTemplate
+              : undefined
         };
+      }
 
       this.searchList.searchString = searchStringLowerCase;
 
       this.searchList.items = matches;
-      this.searchList.hidden = this.currentSelectedMultiple.hideOnNoMatches && matches.length === 0;
+      this.searchList.hidden = this.currentSelectedMultiple
+        ? this.currentSelectedMultiple.hideOnNoMatches && matches.length === 0
+        : matches.length === 0;
     }
   }
 
@@ -376,11 +391,12 @@ export class MentionDirective implements OnInit, OnChanges {
       const componentRef = this._viewContainerRef.createComponent(componentFactory);
       this.searchList = componentRef.instance;
       this.searchList.mentionListConfig = this.mentionListConfig;
-      componentRef.instance['itemClick'].subscribe(() => {
+      this.listItemClickSubscription = this.searchList.itemClick.subscribe(() => {
         nativeElement.focus();
         const fakeKeydown = {'keyCode': KEY_ENTER, 'wasClick': true};
         this.keyHandler(fakeKeydown, nativeElement);
       });
+      this.listHideSubscription = this.searchList.listHide.subscribe(() => this.mentionHide.emit());
     } else {
       this.searchList.activeIndex = 0;
       this.searchList.position(nativeElement, this.iframe);
@@ -389,6 +405,19 @@ export class MentionDirective implements OnInit, OnChanges {
     this.searchList.itemTemplate = this.itemTemplate;
     this.searchList.labelKey = this.labelKey;
 
-    setTimeout(() => this.searchList.position(nativeElement, this.iframe), 200);
+    setTimeout(() => {
+      this.searchList.position(nativeElement, this.iframe);
+      this.mentionVisible.emit();
+    }, 200);
+  }
+
+  ngOnDestroy(): void {
+    if (this.listItemClickSubscription) {
+      this.listItemClickSubscription.unsubscribe();
+    }
+
+    if (this.listHideSubscription) {
+      this.listHideSubscription.unsubscribe();
+    }
   }
 }

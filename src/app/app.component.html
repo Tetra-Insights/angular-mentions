@@ -63,6 +63,8 @@
 <div [mention]="[{charTrigger: '@', items: items, itemTemplate: userTemplate},
       {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, footerTemplate: customFooter, hideOnNoMatches: false}]"
      [mentionListConfig]="{headerTemplate: customHeader, listClasses: 'scrollable-menu pretty-scrollbar custom-list', position: 'fixed'}"
+     (mentionHide)="onMentionHide()"
+     (mentionVisible)="onMentionVisible()"
      class="form-control" contenteditable="true"
      style="border:1px lightgrey solid;min-height:88px"></div>
 
