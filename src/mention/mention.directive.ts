@@ -199,7 +199,6 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
   }
 
   blurHandler(event: any) {
-    console.log(event);
     this.stopEvent(event);
     this.stopSearch = true;
     if (this.searchList) {
