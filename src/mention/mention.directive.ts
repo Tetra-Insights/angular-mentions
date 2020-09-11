@@ -3,7 +3,6 @@ import {EventEmitter, Output, OnInit, OnChanges, SimpleChanges} from '@angular/c
 
 import {IMentionListConfig, MentionListComponent} from './mention-list.component';
 import {getValue, insertValue, getCaretPosition, setCaretPosition} from './mention-utils';
-import {Subscription} from 'rxjs/Subscription';
 
 const KEY_BACKSPACE = 8;
 const KEY_TAB = 9;
@@ -117,8 +116,8 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
   // option to limit the number of items shown in the pop-up menu
   private maxItems: number = -1;
 
-  private listItemClickSubscription: Subscription;
-  private listHideSubscription: Subscription;
+  private listItemClickSubscription: any;
+  private listHideSubscription: any;
 
   // optional function to format the selected item before inserting the text
   private mentionSelect: IMentionLabelSelector
