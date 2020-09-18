@@ -59,7 +59,7 @@
      class="form-control" contenteditable="true"
      style="border:1px lightgrey solid;min-height:88px"></div>
 
-<h3>Content Editable with Multiple Triggers and Item Templates (@, #)</h3>
+<h3>Content Editable with Multiple Triggers and Item Templates (@, #) and CustomFooter for '#' + mentionHide and mentionVisible events</h3>
 <div [mention]="[{charTrigger: '@', items: items, itemTemplate: userTemplate},
       {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, footerTemplate: customFooter, hideOnNoMatches: false}]"
      [mentionListConfig]="{headerTemplate: customHeader, listClasses: 'scrollable-menu pretty-scrollbar custom-list', position: 'fixed'}"
@@ -67,6 +67,18 @@
      (mentionVisible)="onMentionVisible()"
      class="form-control" contenteditable="true"
      style="border:1px lightgrey solid;min-height:88px"></div>
+
+<h3>Content Editable with Multiple Triggers and Item Templates (@, #) and CustomFooter/trigger for '#' + mentionHide and mentionVisible events</h3>
+<div  #mentionWithAddCharButton='mentionDirective'
+      [mention]="[{charTrigger: '@', items: items, itemTemplate: userTemplate},
+      {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, footerTemplate: customFooter, hideOnNoMatches: false}]"
+     [mentionListConfig]="{headerTemplate: customHeader, listClasses: 'scrollable-menu pretty-scrollbar custom-list', position: 'fixed'}"
+     (mentionHide)="onMentionHide()"
+     (mentionVisible)="onMentionVisible()"
+      id="ce-add-char-functionality"
+     class="form-control" contenteditable="true"
+     style="border:1px lightgrey solid;min-height:88px"></div>
+<button id="toggle-tag-autocomplete" (mousedown)="onOpenTagsDropdown($event)">#</button>
 
 <ng-template #customHeader let-items="items">
   <div class="header" style="user-select: none;" *ngIf="items.length > 0">

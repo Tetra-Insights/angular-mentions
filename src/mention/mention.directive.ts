@@ -48,6 +48,7 @@ export type IMentionLabelSelector = (item: any, labelKey?: string, triggerChar?:
  */
 @Directive({
   selector: '[mention]',
+  exportAs: 'mentionDirective',
   host: {
     '(keydown)': 'keyHandler($event)',
     '(blur)': 'blurHandler($event)'
