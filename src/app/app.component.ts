@@ -1,7 +1,7 @@
 import {Component, ViewChild} from '@angular/core';
 
-import { COMMON_NAMES } from './common-names';
-import { COMMON_TAGS } from './common-tags'
+import {COMMON_NAMES} from './common-names';
+import {COMMON_TAGS} from './common-tags'
 import {MentionDirective} from '../mention';
 
 /**
@@ -28,25 +28,24 @@ export class AppComponent {
 
   insertAtCaret(id, text) {
     const myField: any = document.getElementById(id);
-    setTimeout(() => {
-      const _document: any = document;
+    const _document: any = document;
 
-      if (_document.selection) {
-        myField.focus();
-        const sel = _document.selection.createRange();
-        sel.text = text;
-      } else {
-        const selection = window.getSelection();
-        const range = selection.getRangeAt(0);
-        const startPos = range.startOffset;
-        const endPos = range.endOffset;
-        myField.innerText = myField.innerText.substring(0, startPos)
-          + text
-          + myField.innerText.substring(endPos, myField.innerText.length);
+    if (_document.selection) {
+      myField.focus();
+      const sel = _document.selection.createRange();
+      sel.text = text;
+    } else {
+      const selection = window.getSelection();
+      const range = selection.getRangeAt(0);
+      const startPos = range.startOffset;
+      const endPos = range.endOffset;
 
-        this.setCaret(myField, startPos + text.length);
-      }
-    }, 10);
+      myField.innerText = myField.innerHTML.substring(0, startPos)
+        + text
+        + myField.innerHTML.substring(endPos, myField.innerHTML.length);
+
+      this.setCaret(myField, startPos + text.length);
+    }
   }
 
   setCaret(el, offset) {
@@ -63,8 +62,11 @@ export class AppComponent {
   onOpenTagsDropdown($event) {
     $event.preventDefault();
 
-    this.mentionWithAddCharButton.keyHandler(new KeyboardEvent('keydown', {key: '#'}));
-    this.insertAtCaret('ce-add-char-functionality', '#');
+    this.insertAtCaret('ce-add-char-functionality', ' ');
+    setTimeout(() => {
+      this.mentionWithAddCharButton.keyHandler(new KeyboardEvent('keydown', {key: '#'}));
+      this.insertAtCaret('ce-add-char-functionality', '#');
+    }, 10);
   }
 
 }
