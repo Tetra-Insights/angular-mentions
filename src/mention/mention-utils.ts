@@ -180,8 +180,7 @@ function localToRelativeCoordinates(
   }
 }
 
-export function insertAtCaret(id, text) {
-  const myField: any = document.getElementById(id);
+export function insertAtCaret(myField, text) {
   const _document: any = document;
 
   if (_document.selection) {

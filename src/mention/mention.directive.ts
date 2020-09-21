@@ -426,12 +426,12 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
     const prevCharAtCaret = getPreviousCharAtCarer(this._element.nativeElement);
 
     if (prevCharAtCaret && !SPACE_CHAR_CODES.includes(prevCharAtCaret.charCodeAt(0))) {
-      insertAtCaret('ce-add-char-functionality', ' ');
+      insertAtCaret(this._element.nativeElement, ' ');
     }
 
     setTimeout(() => {
       this.keyHandler(new KeyboardEvent('keydown', {key: triggerChar}));
-      insertAtCaret('ce-add-char-functionality', triggerChar);
+      insertAtCaret(this._element.nativeElement, triggerChar);
     }, 10);
   }
 
