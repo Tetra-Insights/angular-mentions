@@ -2,7 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 
 import {COMMON_NAMES} from './common-names';
 import {COMMON_TAGS} from './common-tags'
-import {MentionDirective} from '../mention';
+import {insertAtCaret, MentionDirective} from '../mention';
 
 /**
  * Demo app showing usage of the mentions directive.
@@ -26,47 +26,8 @@ export class AppComponent {
     console.log('visible');
   }
 
-  insertAtCaret(id, text) {
-    const myField: any = document.getElementById(id);
-    const _document: any = document;
-
-    if (_document.selection) {
-      myField.focus();
-      const sel = _document.selection.createRange();
-      sel.text = text;
-    } else {
-      const selection = window.getSelection();
-      const range = selection.getRangeAt(0);
-      const startPos = range.startOffset;
-      const endPos = range.endOffset;
-
-      myField.innerText = myField.innerHTML.substring(0, startPos)
-        + text
-        + myField.innerHTML.substring(endPos, myField.innerHTML.length);
-
-      this.setCaret(myField, startPos + text.length);
-    }
-  }
-
-  setCaret(el, offset) {
-    const range = document.createRange();
-    const sel = window.getSelection();
-
-    range.setStart(el.childNodes[0], offset);
-    range.collapse(true);
-
-    sel.removeAllRanges();
-    sel.addRange(range);
-  }
-
   onOpenTagsDropdown($event) {
-    $event.preventDefault();
-
-    this.insertAtCaret('ce-add-char-functionality', ' ');
-    setTimeout(() => {
-      this.mentionWithAddCharButton.keyHandler(new KeyboardEvent('keydown', {key: '#'}));
-      this.insertAtCaret('ce-add-char-functionality', '#');
-    }, 10);
+    this.mentionWithAddCharButton.triggerAutocomplete($event);
   }
 
 }

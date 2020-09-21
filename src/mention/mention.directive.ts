@@ -2,7 +2,7 @@ import {Directive, ElementRef, Input, ComponentFactoryResolver, ViewContainerRef
 import {EventEmitter, Output, OnInit, OnChanges, SimpleChanges} from '@angular/core';
 
 import {IMentionListConfig, MentionListComponent} from './mention-list.component';
-import {getValue, insertValue, getCaretPosition, setCaretPosition} from './mention-utils';
+import {getValue, insertValue, getCaretPosition, setCaretPosition, insertAtCaret, getPreviousCharAtCarer} from './mention-utils';
 
 const KEY_BACKSPACE = 8;
 const KEY_TAB = 9;
@@ -39,6 +39,8 @@ export interface IMentionConfig {
 }
 
 export type IMentionLabelSelector = (item: any, labelKey?: string, triggerChar?: string) => string;
+
+const SPACE_CHAR_CODES = [31, 32, 160];
 
 /**
  * Angular 2 Mentions.
@@ -241,7 +243,7 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
       }
 
       if (!this.multiplesTriggers || (!this.currentSelectedMultiple.spaceSeparated && this.currentSelectedMultiple.hideOnNoMatches) ||
-        val.length === 0 || [31, 32, 160].includes(val.charCodeAt(val.length - 1))) {
+        val.length === 0 || SPACE_CHAR_CODES.includes(val.charCodeAt(val.length - 1))) {
         this.showSearchList(nativeElement);
         this.updateSearchList();
       }
@@ -408,6 +410,29 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
       this.searchList.position(nativeElement, this.iframe);
       this.mentionVisible.emit();
     }, 200);
+  }
+
+  triggerAutocomplete($event, triggerChar = '#') {
+    $event.preventDefault();
+
+    if (document.activeElement === this._element.nativeElement) {
+      this._element.nativeElement.focus();
+    }
+
+    this.insertTriggerChar(triggerChar);
+  }
+
+  private insertTriggerChar(triggerChar) {
+    const prevCharAtCaret = getPreviousCharAtCarer(this._element.nativeElement);
+
+    if (prevCharAtCaret && !SPACE_CHAR_CODES.includes(prevCharAtCaret.charCodeAt(0))) {
+      insertAtCaret('ce-add-char-functionality', ' ');
+    }
+
+    setTimeout(() => {
+      this.keyHandler(new KeyboardEvent('keydown', {key: triggerChar}));
+      insertAtCaret('ce-add-char-functionality', triggerChar);
+    }, 10);
   }
 
   ngOnDestroy(): void {
