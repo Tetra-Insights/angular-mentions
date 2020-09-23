@@ -275,13 +275,15 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
             this.searchList.hide();
             // value is inserted without a trailing space for consistency
             // between element types (div and iframe do not preserve the space)
-            insertValue(nativeElement, this.startPos, pos,
-              this.mentionSelect(this.searchList.activeItem), this.iframe);
-            // fire input event so angular bindings are updated
-            if ('createEvent' in document) {
-              const evt = document.createEvent('HTMLEvents');
-              evt.initEvent('input', false, true);
-              nativeElement.dispatchEvent(evt);
+            if (this.searchList.activeItem) {
+              insertValue(nativeElement, this.startPos, pos,
+                this.mentionSelect(this.searchList.activeItem), this.iframe);
+              // fire input event so angular bindings are updated
+              if ('createEvent' in document) {
+                const evt = document.createEvent('HTMLEvents');
+                evt.initEvent('input', false, true);
+                nativeElement.dispatchEvent(evt);
+              }
             }
             this.startPos = -1;
             return false;
