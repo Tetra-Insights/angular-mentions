@@ -92,6 +92,7 @@
   <div class="footer">
     + Add <span class="badge-default">{{searchString}}</span>
   </div>
+  <button (mousedown)="mentionWithAddCharButton.hide($event)">Hide list</button>
 </ng-template>
 
 <ng-template #userTemplate let-item="item">

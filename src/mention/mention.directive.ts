@@ -415,13 +415,23 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
   }
 
   triggerAutocomplete($event, triggerChar = '#') {
-    $event.preventDefault();
+    if ($event) {
+      $event.preventDefault();
+    }
 
     if (document.activeElement === this._element.nativeElement) {
       this._element.nativeElement.focus();
     }
 
     this.insertTriggerChar(triggerChar);
+  }
+
+  hide($event) {
+    if ($event) {
+      $event.preventDefault();
+    }
+
+    this.searchList.hide();
   }
 
   private insertTriggerChar(triggerChar) {
