@@ -201,12 +201,16 @@ export class MentionListComponent implements OnInit  {
       if (listViewportOffset.bottom > doc.clientHeight) {
         let downHeight = dropdownViewportOffset.height - (dropdownViewportOffset.bottom - doc.clientHeight);
         let upHeight = dropdownViewportOffset.top - fontHeight;
+        const dropdownListHeightDiff = dropdownViewportOffset.height - listViewportOffset.height;
+        const extraHeightFactors = fontHeight + dropdownListHeightDiff;
 
         downHeight = (downHeight > 300 ? 300 : downHeight);
         upHeight = (upHeight > 300 ? 300 : upHeight);
 
         if (downHeight >= upHeight) {
-          this.list.nativeElement.style.height = (listViewportOffset.height > downHeight ? downHeight : listViewportOffset.height) + 'px';
+          this.list.nativeElement.style.height = (listViewportOffset.height + extraHeightFactors > downHeight
+            ? (downHeight - extraHeightFactors)
+            : listViewportOffset.height) + 'px';
         } else {
           const height = listViewportOffset.height > upHeight ? upHeight : listViewportOffset.height;
           this.list.nativeElement.style.height = height + 'px';
