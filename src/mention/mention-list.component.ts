@@ -212,7 +212,10 @@ export class MentionListComponent implements OnInit  {
             ? (downHeight - extraHeightFactors)
             : listViewportOffset.height) + 'px';
         } else {
-          const height = listViewportOffset.height > upHeight ? upHeight : listViewportOffset.height;
+          const height = listViewportOffset.height + extraHeightFactors > upHeight
+            ? (upHeight - extraHeightFactors)
+            : listViewportOffset.height;
+
           this.list.nativeElement.style.height = height + 'px';
           const heightDiff = height - listViewportOffset.height;
           el.style.top = (coords.top - (dropdownViewportOffset.height + heightDiff) - fontHeight) + 'px';
