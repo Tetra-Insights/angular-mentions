@@ -15,6 +15,11 @@ export interface IMentionListConfig {
   position?: 'relative' | 'fixed';
 }
 
+export enum ListShowDirectionEnum {
+  UP,
+  DOWN
+}
+
 /**
  * Angular 2 Mentions.
  * https://github.com/dmacfarlane/angular-mentions
@@ -75,7 +80,8 @@ export interface IMentionListConfig {
       <ng-container *ngIf="mentionListConfig"
                     [ngTemplateOutlet]="mentionListConfig.headerTemplate"
                     [ngTemplateOutletContext]="{'searchString': searchString, 'items': items}"></ng-container>
-      <ul #list [class]="mentionListConfig.listClasses ? mentionListConfig.listClasses : 'scrollable-menu'">
+      <ul #list [class]="mentionListConfig.listClasses ? mentionListConfig.listClasses : 'scrollable-menu'"
+          [hidden]="showDirection === ListShowDirectionEnum.DOWN && items.length === 0">
         <li *ngFor="let item of items; let i = index" [class.active]="activeIndex==i">
           <a class="dropdown-item" (mousedown)="activeIndex=i;itemClick.emit();$event.preventDefault()"
              (mouseenter)="mentionListConfig.activeOnHover && activateItem(i)">
@@ -112,6 +118,10 @@ export class MentionListComponent implements OnInit  {
   items = [];
   activeIndex = 0;
   hidden = false;
+
+  ListShowDirectionEnum = ListShowDirectionEnum;
+  showDirection: ListShowDirectionEnum = ListShowDirectionEnum.DOWN;
+
 
   constructor(private _element: ElementRef) {
   }
@@ -188,6 +198,7 @@ export class MentionListComponent implements OnInit  {
 
     this.dropdown.nativeElement.style.height = this.list.nativeElement.style.height = 'auto';
     this.dropdown.nativeElement.style.opacity = 0;
+    this.dropdown.nativeElement.hidden = false;
 
     setTimeout(() => {
       const listViewportOffset: ClientRect = this.list.nativeElement.getBoundingClientRect();
@@ -208,10 +219,13 @@ export class MentionListComponent implements OnInit  {
         upHeight = (upHeight > 300 ? 300 : upHeight);
 
         if (downHeight >= upHeight) {
+          this.showDirection = ListShowDirectionEnum.DOWN;
           this.list.nativeElement.style.height = (listViewportOffset.height + extraHeightFactors > downHeight
             ? (downHeight - extraHeightFactors)
             : listViewportOffset.height) + 'px';
         } else {
+          this.showDirection = ListShowDirectionEnum.UP;
+
           const height = listViewportOffset.height + extraHeightFactors > upHeight
             ? (upHeight - extraHeightFactors)
             : listViewportOffset.height;
