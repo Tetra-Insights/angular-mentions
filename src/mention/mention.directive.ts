@@ -426,9 +426,13 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
     this.insertTriggerChar(triggerChar);
   }
 
-  hide($event) {
+  hide($event, addSpace = true) {
     if ($event) {
       $event.preventDefault();
+    }
+
+    if (addSpace) {
+      insertAtCaret(this._element.nativeElement, ' ');
     }
 
     this.searchList.hide();

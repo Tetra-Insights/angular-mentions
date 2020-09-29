@@ -195,11 +195,14 @@ export function insertAtCaret(myField, text) {
 
     const cleanedHTML = myField.innerHTML.replace(/&nbsp;/ig, ' ');
 
+    const textLength = text === ' ' ? 1 : text.length;
+    text = text === ' ' ? '&nbsp;' : text;
+
     myField.innerHTML = cleanedHTML.substring(0, startPos)
       + text
       + cleanedHTML.substring(endPos, cleanedHTML.length);
 
-    setCaret(myField, startPos + text.length);
+    setCaret(myField, startPos + textLength);
   }
 }
 
