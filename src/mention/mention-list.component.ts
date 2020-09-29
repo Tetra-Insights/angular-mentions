@@ -261,6 +261,7 @@ export class MentionListComponent implements OnInit  {
 
   hide() {
     this.dropdown.nativeElement.style.height = this.list.nativeElement.style.height = 'auto';
+    this._element.nativeElement.classList.remove('up-list', 'down-list');
     this.hidden = true;
 
     this.listHide.emit();
