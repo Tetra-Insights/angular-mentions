@@ -400,6 +400,7 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
         this.keyHandler(fakeKeydown, nativeElement);
       });
       this.listHideSubscription = this.searchList.listHide.subscribe(() => this.mentionHide.emit());
+      setTimeout(() => this.searchList.position(nativeElement, this.iframe), 100);
     } else {
       this.searchList.activeIndex = 0;
       this.searchList.position(nativeElement, this.iframe);
@@ -409,7 +410,7 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
     this.searchList.labelKey = this.labelKey;
 
     setTimeout(() => {
-      this.searchList.position(nativeElement, this.iframe);
+      // this.searchList.position(nativeElement, this.iframe);
       this.mentionVisible.emit();
     }, 200);
   }

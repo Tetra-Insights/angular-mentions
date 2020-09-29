@@ -117,7 +117,7 @@ export class MentionListComponent implements OnInit  {
   _itemTemplate: TemplateRef<any>;
   items = [];
   activeIndex = 0;
-  hidden = false;
+  hidden = true;
 
   ListShowDirectionEnum = ListShowDirectionEnum;
   showDirection: ListShowDirectionEnum = ListShowDirectionEnum.DOWN;
