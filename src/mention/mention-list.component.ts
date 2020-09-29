@@ -220,11 +220,16 @@ export class MentionListComponent implements OnInit  {
 
         if (downHeight >= upHeight) {
           this.showDirection = ListShowDirectionEnum.DOWN;
+          this._element.nativeElement.classList.remove('up-list');
+          this._element.nativeElement.classList.add('down-list');
+
           this.list.nativeElement.style.height = (listViewportOffset.height + extraHeightFactors > downHeight
             ? (downHeight - extraHeightFactors)
             : listViewportOffset.height) + 'px';
         } else {
           this.showDirection = ListShowDirectionEnum.UP;
+          this._element.nativeElement.classList.remove('down-list');
+          this._element.nativeElement.classList.add('up-list');
 
           const height = listViewportOffset.height + extraHeightFactors > upHeight
             ? (upHeight - extraHeightFactors)
@@ -234,6 +239,9 @@ export class MentionListComponent implements OnInit  {
           const heightDiff = height - listViewportOffset.height;
           el.style.top = (coords.top - (dropdownViewportOffset.height + heightDiff) - fontHeight) + 'px';
         }
+      } else {
+        this._element.nativeElement.classList.remove('up-list');
+        this._element.nativeElement.classList.add('down-list');
       }
 
       if (listViewportOffset.right > doc.clientWidth) {
