@@ -436,6 +436,7 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
     }
 
     this.searchList.hide();
+    this.startPos = -1;
   }
 
   private insertTriggerChar(triggerChar) {
