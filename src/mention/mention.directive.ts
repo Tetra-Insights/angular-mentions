@@ -443,7 +443,9 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
   private insertTriggerChar(triggerChar) {
     const prevCharAtCaret = getPreviousCharAtCarer(this._element.nativeElement);
 
-    this.searchList.hide();
+    if (this.searchList) {
+      this.searchList.hide();
+    }
 
     if (prevCharAtCaret && !SPACE_CHAR_CODES.includes(prevCharAtCaret.charCodeAt(0))) {
       insertAtCaret(this._element.nativeElement, ' ');
