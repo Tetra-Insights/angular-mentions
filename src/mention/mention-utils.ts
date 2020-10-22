@@ -99,7 +99,8 @@ function getWindowSelection(iframe: HTMLIFrameElement): Selection {
   }
 }
 
-export function getContentEditableCaretCoords(ctx: { iframe: HTMLIFrameElement, parent?: Element }) {
+export function getContentEditableCaretCoords(ctx: { iframe: HTMLIFrameElement, parent?: Element }, relativeToViewport = false)
+  : { top: number; left: number; height: number } {
   const markerTextChar = '\ufeff';
   const markerId = 'sel_' + new Date().getTime() + '_' + Math.random().toString().substr(2);
   const doc = getDocument(ctx ? ctx.iframe : null);
@@ -120,6 +121,13 @@ export function getContentEditableCaretCoords(ctx: { iframe: HTMLIFrameElement, 
   range.insertNode(markerEl);
   sel.removeAllRanges();
   sel.addRange(prevRange);
+
+  const relativeToViewPortCoords: ClientRect = range.getBoundingClientRect();
+
+  if (relativeToViewport) {
+    markerEl.parentNode.removeChild(markerEl);
+    return {top: relativeToViewPortCoords.top, left: relativeToViewPortCoords.left, height: relativeToViewPortCoords.height};
+  }
 
   const coordinates = {
     left: 0,
@@ -170,4 +178,48 @@ function localToRelativeCoordinates(
       iframe = null;
     }
   }
+}
+
+export function insertAtCaret(myField, text) {
+  const _document: any = document;
+
+  if (_document.selection) {
+    myField.focus();
+    const sel = _document.selection.createRange();
+    sel.text = text;
+  } else {
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    const startPos = range.startOffset;
+    const endPos = range.endOffset;
+
+    const cleanedHTML = myField.innerHTML.replace(/&nbsp;/ig, ' ');
+
+    const textLength = text === ' ' ? 1 : text.length;
+    text = text === ' ' ? '&nbsp;' : text;
+
+    myField.innerHTML = cleanedHTML.substring(0, startPos)
+      + text
+      + cleanedHTML.substring(endPos, cleanedHTML.length);
+
+    setCaret(myField, startPos + textLength);
+  }
+}
+
+export function setCaret(el, offset) {
+  const range = document.createRange();
+  const sel = window.getSelection();
+
+  range.setStart(el.childNodes[0], offset);
+  range.collapse(true);
+
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+export function getPreviousCharAtCarer(element) {
+  const caretPos = getCaretPosition(element);
+  const elemValue = getValue(element);
+
+  return caretPos > 0 ? elemValue[caretPos - 1] : null;
 }

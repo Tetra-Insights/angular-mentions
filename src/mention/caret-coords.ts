@@ -58,7 +58,9 @@ export function getCaretCoordinates(element, position, options = null) {
   var debug = options && options.debug || false;
   if (debug) {
     var el = document.querySelector('#input-textarea-caret-position-mirror-div');
-    if (el) { el.parentNode.removeChild(el); }
+    if (el) {
+      el.parentNode.removeChild(el);
+    }
   }
 
   // mirrored div
@@ -71,13 +73,15 @@ export function getCaretCoordinates(element, position, options = null) {
 
   // default textarea styles
   style.whiteSpace = 'pre-wrap';
-  if (element.nodeName !== 'INPUT')
+  if (element.nodeName !== 'INPUT') {
     style.wordWrap = 'break-word';  // only for textarea-s
+  }
 
   // position off-screen
   style.position = 'absolute';  // required to return coordinates properly
-  if (!debug)
+  if (!debug) {
     style.visibility = 'hidden';  // not 'display: none' because we want rendering
+  }
 
   // transfer the element's properties to the div
   properties.forEach(function (prop) {

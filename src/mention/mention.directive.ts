@@ -1,8 +1,8 @@
-import {Directive, ElementRef, Input, ComponentFactoryResolver, ViewContainerRef, TemplateRef} from '@angular/core';
+import {Directive, ElementRef, Input, ComponentFactoryResolver, ViewContainerRef, TemplateRef, OnDestroy} from '@angular/core';
 import {EventEmitter, Output, OnInit, OnChanges, SimpleChanges} from '@angular/core';
 
 import {IMentionListConfig, MentionListComponent} from './mention-list.component';
-import {getValue, insertValue, getCaretPosition, setCaretPosition} from './mention-utils';
+import {getValue, insertValue, getCaretPosition, setCaretPosition, insertAtCaret, getPreviousCharAtCarer} from './mention-utils';
 
 const KEY_BACKSPACE = 8;
 const KEY_TAB = 9;
@@ -24,6 +24,9 @@ export interface ItemsDescription {
   mentionSelect?: IMentionLabelSelector;
   itemTemplate?: TemplateRef<any>;
   spaceSeparated?: boolean;
+  headerTemplate?: TemplateRef<any>;
+  footerTemplate?: TemplateRef<any>;
+  hideOnNoMatches?: boolean; // Activating this option will disable automatically spaceSeparated one.
 }
 
 export interface IMentionConfig {
@@ -37,6 +40,8 @@ export interface IMentionConfig {
 
 export type IMentionLabelSelector = (item: any, labelKey?: string, triggerChar?: string) => string;
 
+const SPACE_CHAR_CODES = [31, 32, 160];
+
 /**
  * Angular 2 Mentions.
  * https://github.com/dmacfarlane/angular-mentions
@@ -45,12 +50,13 @@ export type IMentionLabelSelector = (item: any, labelKey?: string, triggerChar?:
  */
 @Directive({
   selector: '[mention]',
+  exportAs: 'mentionDirective',
   host: {
     '(keydown)': 'keyHandler($event)',
     '(blur)': 'blurHandler($event)'
   }
 })
-export class MentionDirective implements OnInit, OnChanges {
+export class MentionDirective implements OnInit, OnChanges, OnDestroy {
 
   @Input() set mention(items: any[] | ItemsDescription[]) {
     if (items.length > 0) {
@@ -81,7 +87,10 @@ export class MentionDirective implements OnInit, OnChanges {
   @Input() mentionListConfig: IMentionListConfig;
 
   // event emitted whenever the search term changes
-  @Output() searchTerm = new EventEmitter();
+  @Output() searchTerm = new EventEmitter<string>();
+
+  @Output() mentionVisible = new EventEmitter();
+  @Output() mentionHide = new EventEmitter();
 
   searchString: string;
   startPos: number;
@@ -110,6 +119,9 @@ export class MentionDirective implements OnInit, OnChanges {
   // option to limit the number of items shown in the pop-up menu
   private maxItems: number = -1;
 
+  private listItemClickSubscription: any;
+  private listHideSubscription: any;
+
   // optional function to format the selected item before inserting the text
   private mentionSelect: IMentionLabelSelector
     = (item: any, labelKey: string = this.labelKey, triggerChar?: string) => this.triggerChar + item[labelKey];
@@ -132,7 +144,8 @@ export class MentionDirective implements OnInit, OnChanges {
           ...elem,
           items: this.initializeItemsList(elem.items, elem.labelKey),
           labelKey: elem.labelKey || this.labelKey,
-          mentionSelect: elem.mentionSelect || this.defaultMentionSelectFunctionCreator(elem)
+          mentionSelect: elem.mentionSelect || this.defaultMentionSelectFunctionCreator(elem),
+          hideOnNoMatches: elem.hideOnNoMatches === undefined ? true : elem.hideOnNoMatches
         }));
     }
   }
@@ -229,8 +242,8 @@ export class MentionDirective implements OnInit, OnChanges {
         this.initializeItemsFromMultiple(charPressed);
       }
 
-      if (!this.multiplesTriggers || !this.currentSelectedMultiple.spaceSeparated ||
-        val.length === 0 || [31, 160].includes(val.charCodeAt(val.length - 1))) {
+      if (!this.multiplesTriggers || (!this.currentSelectedMultiple.spaceSeparated && this.currentSelectedMultiple.hideOnNoMatches) ||
+        val.length === 0 || SPACE_CHAR_CODES.includes(val.charCodeAt(val.length - 1))) {
         this.showSearchList(nativeElement);
         this.updateSearchList();
       }
@@ -245,6 +258,11 @@ export class MentionDirective implements OnInit, OnChanges {
       ) {
         if (event.keyCode === KEY_SPACE) {
           this.startPos = -1;
+
+          if (!this.currentSelectedMultiple.spaceSeparated || !this.currentSelectedMultiple.hideOnNoMatches) {
+            this.searchList.hide();
+            return;
+          }
         } else if (event.keyCode === KEY_BACKSPACE && pos > 0) {
           pos--;
           if (pos === 0) {
@@ -257,13 +275,15 @@ export class MentionDirective implements OnInit, OnChanges {
             this.searchList.hide();
             // value is inserted without a trailing space for consistency
             // between element types (div and iframe do not preserve the space)
-            insertValue(nativeElement, this.startPos, pos,
-              this.mentionSelect(this.searchList.activeItem), this.iframe);
-            // fire input event so angular bindings are updated
-            if ('createEvent' in document) {
-              const evt = document.createEvent('HTMLEvents');
-              evt.initEvent('input', false, true);
-              nativeElement.dispatchEvent(evt);
+            if (this.searchList.activeItem) {
+              insertValue(nativeElement, this.startPos, pos,
+                this.mentionSelect(this.searchList.activeItem), this.iframe);
+              // fire input event so angular bindings are updated
+              if ('createEvent' in document) {
+                const evt = document.createEvent('HTMLEvents');
+                evt.initEvent('input', false, true);
+                nativeElement.dispatchEvent(evt);
+              }
             }
             this.startPos = -1;
             return false;
@@ -291,9 +311,14 @@ export class MentionDirective implements OnInit, OnChanges {
           if (event.keyCode !== KEY_BACKSPACE) {
             mention += charPressed;
           }
-          this.searchString = mention;
-          this.searchTerm.emit(this.searchString);
-          this.updateSearchList();
+
+          if (this.triggerChar.includes(mention)) {
+            this.searchList.hide();
+          } else {
+            this.searchString = mention;
+            this.searchTerm.emit(this.searchString);
+            this.updateSearchList();
+          }
         }
       }
     }
@@ -310,11 +335,16 @@ export class MentionDirective implements OnInit, OnChanges {
 
   updateSearchList() {
     let matches: any[] = [];
+
+    let searchStringLowerCase = this.currentSelectedMultiple && this.currentSelectedMultiple.startsWithCharTrigger
+      ? this.currentSelectedMultiple.charTrigger
+      : '';
+
     if (this.items) {
       let objects = this.items;
       // disabling the search relies on the async operation to do the filtering
       if (!this.disableSearch && this.searchString) {
-        let searchStringLowerCase = this.searchString.toLowerCase();
+        searchStringLowerCase = this.searchString.toLowerCase();
 
         if (this.currentSelectedMultiple && this.currentSelectedMultiple.startsWithCharTrigger) {
           searchStringLowerCase = this.currentSelectedMultiple.charTrigger + searchStringLowerCase;
@@ -329,8 +359,32 @@ export class MentionDirective implements OnInit, OnChanges {
     }
     // update the search list
     if (this.searchList) {
+      if (this.currentSelectedMultiple) {
+        this.searchList.mentionListConfig = {
+          ...this.mentionListConfig,
+          headerTemplate: this.currentSelectedMultiple.headerTemplate
+            ? this.currentSelectedMultiple.headerTemplate
+            : this.mentionListConfig
+              ? this.mentionListConfig.headerTemplate
+              : undefined
+        };
+
+        this.searchList.mentionListConfig = {
+          ...this.mentionListConfig,
+          footerTemplate: this.currentSelectedMultiple.footerTemplate
+            ? this.currentSelectedMultiple.footerTemplate
+            : this.mentionListConfig
+              ? this.mentionListConfig.footerTemplate
+              : undefined
+        };
+      }
+
+      this.searchList.searchString = searchStringLowerCase;
+
       this.searchList.items = matches;
-      this.searchList.hidden = matches.length === 0;
+      this.searchList.hidden = this.currentSelectedMultiple
+        ? this.currentSelectedMultiple.hideOnNoMatches && matches.length === 0
+        : matches.length === 0;
     }
   }
 
@@ -339,13 +393,14 @@ export class MentionDirective implements OnInit, OnChanges {
       const componentFactory = this._componentResolver.resolveComponentFactory(MentionListComponent);
       const componentRef = this._viewContainerRef.createComponent(componentFactory);
       this.searchList = componentRef.instance;
-      this.searchList.position(nativeElement, this.iframe);
       this.searchList.mentionListConfig = this.mentionListConfig;
-      componentRef.instance['itemClick'].subscribe(() => {
+      this.listItemClickSubscription = this.searchList.itemClick.subscribe(() => {
         nativeElement.focus();
         const fakeKeydown = {'keyCode': KEY_ENTER, 'wasClick': true};
         this.keyHandler(fakeKeydown, nativeElement);
       });
+      this.listHideSubscription = this.searchList.listHide.subscribe(() => this.mentionHide.emit());
+      setTimeout(() => this.searchList.position(nativeElement, this.iframe), 100);
     } else {
       this.searchList.activeIndex = 0;
       this.searchList.position(nativeElement, this.iframe);
@@ -353,5 +408,63 @@ export class MentionDirective implements OnInit, OnChanges {
     }
     this.searchList.itemTemplate = this.itemTemplate;
     this.searchList.labelKey = this.labelKey;
+
+    setTimeout(() => {
+      // this.searchList.position(nativeElement, this.iframe);
+      this.mentionVisible.emit();
+    }, 200);
+  }
+
+  triggerAutocomplete($event, triggerChar = '#') {
+    if ($event) {
+      $event.preventDefault();
+    }
+
+    if (document.activeElement === this._element.nativeElement) {
+      this._element.nativeElement.focus();
+    }
+
+    this.insertTriggerChar(triggerChar);
+  }
+
+  hide($event, addSpace = true) {
+    if ($event) {
+      $event.preventDefault();
+    }
+
+    if (addSpace) {
+      insertAtCaret(this._element.nativeElement, ' ');
+    }
+
+    this.searchList.hide();
+    this.startPos = -1;
+  }
+
+  private insertTriggerChar(triggerChar) {
+    const prevCharAtCaret = getPreviousCharAtCarer(this._element.nativeElement);
+
+    if (this.searchList) {
+      this.searchList.hide();
+    }
+
+    if (prevCharAtCaret && !SPACE_CHAR_CODES.includes(prevCharAtCaret.charCodeAt(0))) {
+      insertAtCaret(this._element.nativeElement, ' ');
+    }
+
+    setTimeout(() => {
+      this.keyHandler(new KeyboardEvent('keydown', {key: triggerChar}));
+      insertAtCaret(this._element.nativeElement, triggerChar);
+    }, 10);
+  }
+
+  ngOnDestroy(): void {
+    // Following this article: https://medium.com/@ole.ersoy/cleaning-up-subscriptions-to-dynamic-component-event-emitters-ad08c838c7a8
+    if (this.listItemClickSubscription) {
+      this.listItemClickSubscription.unsubscribe();
+    }
+
+    if (this.listHideSubscription) {
+      this.listHideSubscription.unsubscribe();
+    }
   }
 }

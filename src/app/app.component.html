@@ -37,12 +37,62 @@
 <div [mention]="[{charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
      class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
 
-<ng-template #customHeader>
-  <div class="header" style="user-select: none;">
+<h3>Fixed Positioning</h3>
+<div style="overflow: scroll; height: 200px; width: 100%;border:1px lightgrey solid; min-height:88px">
+  <div [mention]="[{charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
+       [mentionListConfig]="{position: 'fixed'}"
+       class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
+  <div [mention]="[{charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
+       [mentionListConfig]="{position: 'fixed'}"
+       class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
+  <div [mention]="[{charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
+       [mentionListConfig]="{position: 'fixed'}"
+       class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
+  <div [mention]="[{charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
+       [mentionListConfig]="{position: 'fixed'}"
+       class="form-control" contenteditable="true" style="border:1px lightgrey solid;min-height:88px"></div>
+</div>
+
+<h3>Content Editable with customized appearance list an Fixed Positioning</h3>
+<div [mention]="[{charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, spaceSeparated: true}]"
+     [mentionListConfig]="{headerTemplate: customHeader, listClasses: 'scrollable-menu pretty-scrollbar custom-list', position: 'fixed'}"
+     class="form-control" contenteditable="true"
+     style="border:1px lightgrey solid;min-height:88px"></div>
+
+<h3>Content Editable with Multiple Triggers and Item Templates (@, #) and CustomFooter for '#' + mentionHide and mentionVisible events</h3>
+<div [mention]="[{charTrigger: '@', items: items, itemTemplate: userTemplate},
+      {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, footerTemplate: customFooter, hideOnNoMatches: false}]"
+     [mentionListConfig]="{headerTemplate: customHeader, listClasses: 'scrollable-menu pretty-scrollbar custom-list', position: 'fixed'}"
+     (mentionHide)="onMentionHide()"
+     (mentionVisible)="onMentionVisible()"
+     class="form-control" contenteditable="true"
+     style="border:1px lightgrey solid;min-height:88px"></div>
+
+<h3>Content Editable with Multiple Triggers and Item Templates (@, #) and CustomFooter/trigger for '#' + mentionHide and mentionVisible events</h3>
+<div  #mentionWithAddCharButton='mentionDirective'
+      [mention]="[{charTrigger: '@', items: items, itemTemplate: userTemplate},
+      {charTrigger: '#', items: tagsItems, startsWithCharTrigger: true, footerTemplate: customFooter, hideOnNoMatches: false}]"
+     [mentionListConfig]="{headerTemplate: customHeader, listClasses: 'scrollable-menu pretty-scrollbar custom-list', position: 'fixed'}"
+     (mentionHide)="onMentionHide()"
+     (mentionVisible)="onMentionVisible()"
+      id="ce-add-char-functionality"
+     class="form-control" contenteditable="true"
+     style="border:1px lightgrey solid;min-height:88px"></div>
+<button id="toggle-tag-autocomplete" (mousedown)="onOpenTagsDropdown($event)">#</button>
+
+<ng-template #customHeader let-items="items">
+  <div class="header" style="user-select: none;" *ngIf="items.length > 0">
     <span><strong>↑</strong> <strong>↓</strong> to navigate</span>
     <span><strong>↵</strong> to select</span>
     <span><strong>esc</strong> to dismiss</span>
   </div>
+</ng-template>
+
+<ng-template #customFooter let-searchString="searchString">
+  <div class="footer">
+    + Add <span class="badge-default">{{searchString}}</span>
+  </div>
+  <button (mousedown)="mentionWithAddCharButton.hide($event)">Hide list</button>
 </ng-template>
 
 <ng-template #userTemplate let-item="item">
