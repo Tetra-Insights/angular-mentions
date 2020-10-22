@@ -8,4 +8,4 @@ COPY ["package.json", "package-lock.json*","./"]
 
 # install app dependencies...
 RUN npm install
-RUN npm install -g @angular/cli@6
+RUN npm install -g @angular/cli@7
