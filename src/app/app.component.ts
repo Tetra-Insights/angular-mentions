@@ -16,7 +16,7 @@ export class AppComponent {
   items: string[] = COMMON_NAMES;
   tagsItems: string[] = COMMON_TAGS;
 
-  @ViewChild('mentionWithAddCharButton') mentionWithAddCharButton: MentionDirective;
+  @ViewChild('mentionWithAddCharButton',{static:true}) mentionWithAddCharButton: MentionDirective;
 
   onMentionHide() {
     console.log('hide');
