@@ -1,14 +1,9 @@
 
 import {switchMap, distinctUntilChanged, debounceTime} from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
-import { Http } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 
-import { Observable ,  Subject } from 'rxjs';
-
-
-
-
-
+import { Observable ,  Subject , of} from 'rxjs';
 
 @Component({
   selector: 'app-demo-async',
@@ -28,15 +23,15 @@ export class DemoAsyncComponent implements OnInit {
   }
 
   // this should be in a separate demo-async.service.ts file
-  constructor(private http: Http) { }
-  getItems(term): Promise<any[]> {
+  constructor(private http: HttpClient) { }
+  getItems(term): Observable<any[]> {
     console.log('getItems:', term);
+    if (!term) {
+      // if the search term is empty, return an empty array
+      return of([]);
+    }
     // return this.http.get('api/names') // get all names
-    return this.http.get('api/objects?label='+term) // get filtered names
-               .toPromise()
-               .then(data => {console.log(data); return data})
-               .then(response => response.json().data)
-               .catch(this.handleError);
+    return this.http.get<any[]>('api/objects?label='+term); // get filtered names
   }
   handleError(e) {
     console.log(e);
