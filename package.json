@@ -21,11 +21,9 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e",
-    "dist": "ngc -p src/mention",
-    "install": "npm run dist"
+    "e2e": "ng e2e"
   },
-  "private": false,
+  "private": true,
   "peerDependencies": {},
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.901.12",
