@@ -272,7 +272,6 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
         } else if (!this.searchList.hidden) {
           if (event.keyCode === KEY_TAB || event.keyCode === KEY_ENTER) {
             this.stopEvent(event);
-            this.searchList.hide();
             // value is inserted without a trailing space for consistency
             // between element types (div and iframe do not preserve the space)
             if (this.searchList.activeItem) {
@@ -285,6 +284,7 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
                 nativeElement.dispatchEvent(evt);
               }
             }
+            this.searchList.hide();
             this.startPos = -1;
             return false;
           } else if (event.keyCode === KEY_ESCAPE) {
