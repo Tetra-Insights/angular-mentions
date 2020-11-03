@@ -1,6 +1,6 @@
 {
-  "name": "angular-mentions",
-  "version": "0.8.0",
+  "name": "@tetrainsights/angular-mentions",
+  "version": "9.1.2",
   "description": "Angular mentions for text fields.",
   "keywords": [
     "angular",
@@ -23,7 +23,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
-  "private": true,
+  "private": false,
   "peerDependencies": {},
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.901.12",
