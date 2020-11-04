@@ -4,25 +4,65 @@
   "newProjectRoot": "projects",
   "projects": {
     "angular-mentions": {
-      "root": "",
-      "sourceRoot": "src",
+      "projectType": "library",
+      "root": "projects/angular-mentions",
+      "sourceRoot": "projects/angular-mentions/src",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/angular-mentions/tsconfig.lib.json",
+            "project": "projects/angular-mentions/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/angular-mentions/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/angular-mentions/src/test.ts",
+            "tsConfig": "projects/angular-mentions/tsconfig.spec.json",
+            "karmaConfig": "projects/angular-mentions/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/angular-mentions/tsconfig.lib.json",
+              "projects/angular-mentions/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "angular-mentions-demo": {
       "projectType": "application",
+      "root": "projects/angular-mentions-demo",
+      "sourceRoot": "projects/angular-mentions-demo/src",
+      "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "aot": true,
-            "outputPath": "dist",
-            "index": "src/index.html",
-            "main": "src/main.ts",
-            "tsConfig": "src/tsconfig.app.json",
-            "polyfills": "src/polyfills.ts",
+            "outputPath": "dist/angular-mentions-demo",
+            "index": "projects/angular-mentions-demo/src/index.html",
+            "main": "projects/angular-mentions-demo/src/main.ts",
+            "polyfills": "projects/angular-mentions-demo/src/polyfills.ts",
+            "tsConfig": "projects/angular-mentions-demo/tsconfig.app.json",
             "assets": [
-              "src/assets",
-              "src/favicon.ico"
+              "projects/angular-mentions-demo/src/assets",
+              "projects/angular-mentions-demo/src/favicon.ico"
             ],
             "styles": [
-              "src/styles.css"
+              "projects/angular-mentions-demo/src/styles.css"
             ],
             "scripts": []
           },
@@ -55,34 +95,34 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "angular-mentions:build"
+            "browserTarget": "angular-mentions-demo:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "angular-mentions:build:production"
+              "browserTarget": "angular-mentions-demo:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "angular-mentions:build"
+            "browserTarget": "angular-mentions-demo:build"
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "src/test.ts",
-            "karmaConfig": "./karma.conf.js",
-            "polyfills": "src/polyfills.ts",
-            "tsConfig": "src/tsconfig.spec.json",
+            "main": "projects/angular-mentions-demo/src/test.ts",
+            "polyfills": "projects/angular-mentions-demo/src/polyfills.ts",
+            "tsConfig": "projects/angular-mentions-demo/tsconfig.spec.json",
+            "karmaConfig": "projects/angular-mentions-demo/karma.conf.js",
             "scripts": [],
             "styles": [
-              "src/styles.css"
+              "projects/angular-mentions-demo/src/styles.css"
             ],
             "assets": [
-              "src/assets",
-              "src/favicon.ico"
+              "projects/angular-mentions-demo/src/assets",
+              "projects/angular-mentions-demo/src/favicon.ico"
             ]
           }
         },
@@ -90,48 +130,28 @@
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "src/tsconfig.app.json",
-              "src/tsconfig.spec.json"
+              "projects/angular-mentions-demo/tsconfig.app.json",
+              "projects/angular-mentions-demo/tsconfig.spec.json"
             ],
-            "exclude": []
+            "exclude": [
+              "**/node_modules/**"
+            ]
           }
-        }
-      }
-    },
-    "angular-mentions-e2e": {
-      "root": "e2e",
-      "sourceRoot": "e2e",
-      "projectType": "application",
-      "architect": {
+        },
         "e2e": {
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
-            "protractorConfig": "./protractor.conf.js",
-            "devServerTarget": "angular-mentions:serve"
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "e2e/tsconfig.e2e.json"
-            ],
-            "exclude": []
+            "protractorConfig": "projects/angular-mentions-demo/e2e/protractor.conf.js",
+            "devServerTarget": "angular-mentions-demo:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "angular-mentions-demo:serve:production"
+            }
           }
         }
       }
     }
   },
-  "defaultProject": "angular-mentions",
-  "schematics": {
-    "@schematics/angular:component": {
-      "inlineTemplate": false,
-      "skipTests": false,
-      "prefix": "app",
-      "style": "css"
-    },
-    "@schematics/angular:directive": {
-      "prefix": "app"
-    }
-  }
+  "defaultProject": "angular-mentions"
 }

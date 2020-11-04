@@ -4,7 +4,7 @@
     "downlevelIteration": true,
     "importHelpers": true,
     "outDir": "./dist/out-tsc",
-    "baseUrl": "src",
+    "baseUrl": "./",
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "node",
@@ -18,6 +18,15 @@
       "es2016",
       "dom"
     ],
-    "module": "esnext"
+    "module": "esnext",
+    "paths": {
+      "@tetrainsights/angular-mentions": [
+        "dist/angular-mentions"
+      ]
+    }
+  },
+  "angularCompilerOptions": {
+    "fullTemplateTypeCheck": true,
+    "strictInjectionParameters": true
   }
 }

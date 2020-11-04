@@ -8,12 +8,14 @@
     "target": "es5",
     "lib": ["es2016", "dom"],
     "module": "commonjs",
-    "outDir": "../../mention",
+    "outDir": "../../../../dist",
     "typeRoots": [
-      "../../node_modules/@types"
+      "../../../../node_modules/@types"
     ]
   },
+  "include": ["./", "../../../../public_api.ts"],
+  "exclude": ["test", "*.spec.ts"],
   "angularCompilerOptions": {
-    "genDir": "../../aot"
+    "genDir": "../../../../aot"
   }
 }
