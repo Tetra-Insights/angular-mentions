@@ -192,6 +192,7 @@ export class MentionDirective implements OnInit, OnChanges {
     this.stopEvent(event);
     this.stopSearch = true;
     if (this.searchList) {
+      console.log(this.searchList);
       this.searchList.hide();
     }
   }
@@ -236,6 +237,7 @@ export class MentionDirective implements OnInit, OnChanges {
       }
     } else if (this.startPos >= 0 && !this.stopSearch) {
       if (pos <= this.startPos) {
+        console.log(this.searchList);
         this.searchList.hide();
       } else if (event.keyCode !== KEY_SHIFT && // ignore shift when pressed alone, but not when used with another key
         !event.metaKey &&
@@ -254,6 +256,7 @@ export class MentionDirective implements OnInit, OnChanges {
         } else if (!this.searchList.hidden) {
           if (event.keyCode === KEY_TAB || event.keyCode === KEY_ENTER) {
             this.stopEvent(event);
+            console.log(this.searchList);
             this.searchList.hide();
             // value is inserted without a trailing space for consistency
             // between element types (div and iframe do not preserve the space)
@@ -269,6 +272,7 @@ export class MentionDirective implements OnInit, OnChanges {
             return false;
           } else if (event.keyCode === KEY_ESCAPE) {
             this.stopEvent(event);
+            console.log(this.searchList);
             this.searchList.hide();
             this.stopSearch = true;
             return false;
