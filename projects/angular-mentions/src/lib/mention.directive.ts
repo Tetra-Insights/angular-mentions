@@ -245,8 +245,8 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
       if (!this.multiplesTriggers || (!this.currentSelectedMultiple.spaceSeparated && this.currentSelectedMultiple.hideOnNoMatches) ||
         val.length === 0 || (pos === 0) || SPACE_CHAR_CODES.includes(val.charCodeAt(val.length - 1))) {
         this.showSearchList(nativeElement);
-        this.updateSearchList();
       }
+      this.updateSearchList();
     } else if (this.startPos >= 0 && !this.stopSearch) {
       if (pos <= this.startPos) {
         this.searchList.hide();
