@@ -102,9 +102,9 @@ export class MentionListComponent implements OnInit  {
   @Output() itemClick = new EventEmitter();
   @Output() listHide = new EventEmitter();
 
-  @ViewChild('list') list: ElementRef;
-  @ViewChild('dropdown') dropdown: ElementRef;
-  @ViewChild('defaultItemTemplate') defaultItemTemplate: TemplateRef<any>;
+  @ViewChild('list', { static: true }) list: ElementRef;
+  @ViewChild('dropdown', { static: true }) dropdown: ElementRef;
+  @ViewChild('defaultItemTemplate', { static: true }) defaultItemTemplate: TemplateRef<any>;
 
   @Input() set itemTemplate(template: TemplateRef<any>) {
     if (!template) {

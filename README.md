@@ -14,6 +14,12 @@ To install and start the demo application:
     npm install
     ng serve
 
+Or you can run a development environment with just:
+
+    docker-compose up
+
+
+Then open your browser in http://localhost:4200.
 ### Usage
 
 Add the package as a dependency to your project using:

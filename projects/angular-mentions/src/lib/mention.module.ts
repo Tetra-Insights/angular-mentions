@@ -21,7 +21,7 @@ import { MentionListComponent } from './mention-list.component';
     ]
 })
 export class MentionModule {
-    static forRoot(): ModuleWithProviders {
+    static forRoot(): ModuleWithProviders<MentionModule> {
         return {
             ngModule: MentionModule
         };
