@@ -1,0 +1,7 @@
+version: '3.7'
+services:
+  devenv:
+    environment:
+      GITHUB_REGISTRY_PERSONAL_ACCES_TOKEN: ${GITHUB_REGISTRY_PERSONAL_ACCES_TOKEN}
+    command: /bin/sh -c "while sleep 1000; do :; done"
+ 

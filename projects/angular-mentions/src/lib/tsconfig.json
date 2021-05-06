@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "sourceMap": false,
+    "declaration": true,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "es5",
+    "lib": ["es2016", "dom"],
+    "module": "commonjs",
+    "outDir": "../../../../dist",
+    "typeRoots": [
+      "../../../../node_modules/@types"
+    ]
+  },
+  "include": ["./", "../../../../public_api.ts"],
+  "exclude": ["test", "*.spec.ts"],
+  "angularCompilerOptions": {
+    "genDir": "../../../../aot"
+  }
+}
