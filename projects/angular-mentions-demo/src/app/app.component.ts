@@ -2,7 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 
 import {COMMON_NAMES} from './common-names';
 import {COMMON_TAGS} from './common-tags'
-import {insertAtCaret, MentionDirective} from '@tetrainsights/angular-mentions';
+import {insertAtCaret, MentionDirective} from '@tetra-insights/angular-mentions';
 
 /**
  * Demo app showing usage of the mentions directive.

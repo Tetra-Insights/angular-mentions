@@ -20,7 +20,7 @@
     ],
     "module": "esnext",
     "paths": {
-      "@tetrainsights/angular-mentions": [
+      "@tetra-insights/angular-mentions": [
         "dist/angular-mentions"
       ]
     }

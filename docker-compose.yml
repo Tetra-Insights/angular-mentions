@@ -10,6 +10,7 @@ services:
       - "4200:4200" #ng port
     environment:
       NODE_ENV: development
+      GITHUB_PAT: ${GITHUB_PAT}
     volumes:
       - .:/usr/src/app
       - app_node_modules:/usr/src/app/node_modules
