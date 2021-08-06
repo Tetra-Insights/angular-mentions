@@ -71,13 +71,33 @@ export function getCaretPosition(el: HTMLInputElement, iframe: HTMLIFrameElement
     const val = el.value;
     return val.slice(0, el.selectionStart).length;
   } else {
-    const selObj = getWindowSelection(iframe); // window.getSelection();
-    if (selObj.rangeCount > 0) {
-      const selRange = selObj.getRangeAt(0);
-      const position = selRange.startOffset;
-      return position;
-    }
+    return getCaretCharacterOffsetWithin(el);
   }
+}
+
+// Based on this solution: https://stackoverflow.com/a/4812022
+function getCaretCharacterOffsetWithin(element) {
+  let caretOffset = 0;
+  const doc = element.ownerDocument || element.document;
+  const win = doc.defaultView || doc.parentWindow;
+  let sel;
+  if (typeof win.getSelection !== 'undefined') {
+    sel = win.getSelection();
+    if (sel.rangeCount > 0) {
+      const range = win.getSelection().getRangeAt(0);
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(element);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+      caretOffset = preCaretRange.toString().length;
+    }
+  } else if ( (sel = doc.selection) && sel.type !== 'Control') {
+    const textRange = sel.createRange();
+    const preCaretTextRange = doc.body.createTextRange();
+    preCaretTextRange.moveToElementText(element);
+    preCaretTextRange.setEndPoint('EndToEnd', textRange);
+    caretOffset = preCaretTextRange.text.length;
+  }
+  return caretOffset;
 }
 
 // Based on ment.io functions...

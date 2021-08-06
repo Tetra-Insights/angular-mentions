@@ -212,6 +212,7 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
   keyHandler(event: any, nativeElement: HTMLInputElement = this._element.nativeElement) {
     const val: string = getValue(nativeElement);
     let pos = getCaretPosition(nativeElement, this.iframe);
+
     let charPressed = this.keyCodeSpecified ? event.keyCode : event.key;
     if (!charPressed) {
       const charCode = event.which || event.keyCode;
@@ -243,11 +244,12 @@ export class MentionDirective implements OnInit, OnChanges, OnDestroy {
       }
 
       if (!this.multiplesTriggers || (!this.currentSelectedMultiple.spaceSeparated && this.currentSelectedMultiple.hideOnNoMatches) ||
-        val.length === 0 || (pos === 0) || SPACE_CHAR_CODES.includes(val.charCodeAt(val.length - 1))) {
+        val.length === 0 || (pos === 0) || SPACE_CHAR_CODES.includes(val.charCodeAt(pos - 1))) {
         this.showSearchList(nativeElement);
         this.updateSearchList();
       }
-    } else if (this.startPos >= 0 && !this.stopSearch) {
+
+    } else if (this.startPos >= 0 && !this.stopSearch && this.searchList) {
       if (pos <= this.startPos) {
         this.searchList.hide();
       } else if (event.keyCode !== KEY_SHIFT && // ignore shift when pressed alone, but not when used with another key
